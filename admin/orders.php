@@ -14,13 +14,25 @@ require_once '../config/database.php';
 // Model sınıfını dahil et
 require_once '../models/Order.php';
 require_once '../models/Tables.php';
+require_once '../models/Customer.php';
+require_once '../models/Employee.php';
 
-// Sipariş modeli oluştur
+// Modelleri oluştur
 $orderModel = new Order($conn);
 $tableModel = new Tables($conn);
+$customerModel = new Customer($conn);
+$employeeModel = new Employee($conn);
 
-// URL'den table_id parametresini kontrol et
+// Tüm müşterileri ve çalışanları getir
+$customers = $customerModel->getAllCustomers();
+$employees = $employeeModel->getAllEmployees();
+
+// URL parametrelerini al
 $table_filter = isset($_GET['table_id']) ? $_GET['table_id'] : null;
+$customer_filter = isset($_GET['customer_id']) ? $_GET['customer_id'] : null;
+$employee_filter = isset($_GET['employee_id']) ? $_GET['employee_id'] : null;
+$from_date = isset($_GET['from_date']) ? $_GET['from_date'] : '';
+$to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 
 // Sipariş silme işlemi
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
@@ -54,15 +66,49 @@ if (isset($_SESSION['error_msg'])) {
     unset($_SESSION['error_msg']);
 }
 
-// Tüm siparişleri getir (veya belirli bir masanın siparişlerini getir)
+// Siparişleri getir (filtreli veya filtresiz)
+$orders = null;
+$filter_title = "Tüm Siparişler";
+
 if ($table_filter) {
     $orders = $orderModel->getOrdersByTable($table_filter);
-    // Masa bilgisini al
     $table = $tableModel->getTableById($table_filter);
-    $filter_title = "Masa " . $table_filter;
-} else {
+    $filter_title = "Masa " . $table_filter . " Siparişleri";
+} elseif ($customer_filter) {
+    if (!empty($from_date) || !empty($to_date)) {
+        $orders = $orderModel->getOrdersByCustomerAndDateRange($customer_filter, $from_date, $to_date);
+    } else {
+        $orders = $orderModel->getOrdersByCustomer($customer_filter);
+    }
+    $customer = $customerModel->getCustomerById($customer_filter);
+    $filter_title = $customer['first_name'] . ' ' . $customer['last_name'] . " Siparişleri";
+} elseif ($employee_filter) {
+    if (!empty($from_date) || !empty($to_date)) {
+        $orders = $orderModel->getOrdersByEmployeeAndDateRange($employee_filter, $from_date, $to_date);
+    } else {
+        $orders = $orderModel->getOrdersByEmployee($employee_filter);
+    }
+    $employee = $employeeModel->getEmployeeById($employee_filter);
+    $filter_title = $employee['first_name'] . ' ' . $employee['last_name'] . " Siparişleri";
+} elseif (!empty($from_date) || !empty($to_date)) {
+    // Tarih aralığına göre filtreleme
+    // İki tarih de varsa
+    if (!empty($from_date) && !empty($to_date)) {
+        $filter_title = $from_date . " - " . $to_date . " Arası Siparişler";
+    } 
+    // Sadece başlangıç tarihi varsa
+    elseif (!empty($from_date)) {
+        $filter_title = $from_date . " Sonrası Siparişler";
+    } 
+    // Sadece bitiş tarihi varsa
+    else {
+        $filter_title = $to_date . " Öncesi Siparişler";
+    }
+}
+
+// Hiçbir filtre seçilmemişse tüm siparişleri getir
+if ($orders === null) {
     $orders = $orderModel->getAllOrders();
-    $filter_title = "Tüm Siparişler";
 }
 ?>
 
@@ -197,9 +243,9 @@ if ($table_filter) {
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><?php echo $filter_title; ?></h5>
                 <div>
-                    <?php if ($table_filter): ?>
-                        <a href="tables.php" class="btn btn-secondary btn-sm mr-2">
-                            <i class="fas fa-arrow-left"></i> Masalara Dön
+                    <?php if ($table_filter || $customer_filter || $employee_filter || !empty($from_date) || !empty($to_date)): ?>
+                        <a href="orders.php" class="btn btn-secondary btn-sm mr-2">
+                            <i class="fas fa-filter"></i> Filtreleri Sıfırla
                         </a>
                     <?php endif; ?>
                     <a href="add_order.php<?php echo $table_filter ? '?table_id='.$table_filter : ''; ?>" class="btn btn-add btn-sm">
@@ -207,6 +253,56 @@ if ($table_filter) {
                     </a>
                 </div>
             </div>
+            
+            <!-- Filtreleme Formu -->
+            <div class="card-body border-bottom pb-3">
+                <form method="get" action="" class="mb-0">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="customer_id">Müşteri Filtrele</label>
+                                <select class="form-control" id="customer_id" name="customer_id">
+                                    <option value="">-- Müşteri Seçin --</option>
+                                    <?php while ($customer = mysqli_fetch_assoc($customers)): ?>
+                                        <option value="<?php echo $customer['customer_id']; ?>" <?php echo ($customer_filter == $customer['customer_id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($customer['first_name'] . ' ' . $customer['last_name']); ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="employee_id">Çalışan Filtrele</label>
+                                <select class="form-control" id="employee_id" name="employee_id">
+                                    <option value="">-- Çalışan Seçin --</option>
+                                    <?php while ($employee = mysqli_fetch_assoc($employees)): ?>
+                                        <option value="<?php echo $employee['employee_id']; ?>" <?php echo ($employee_filter == $employee['employee_id']) ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($employee['first_name'] . ' ' . $employee['last_name']); ?>
+                                        </option>
+                                    <?php endwhile; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="from_date">Başlangıç Tarihi</label>
+                                <input type="date" class="form-control" id="from_date" name="from_date" value="<?php echo $from_date; ?>">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="to_date">Bitiş Tarihi</label>
+                                <input type="date" class="form-control" id="to_date" name="to_date" value="<?php echo $to_date; ?>">
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary btn-block">Filtrele</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">

@@ -1,4 +1,8 @@
 <?php
+// Hata raporlamayı devre dışı bırak
+error_reporting(0);
+ini_set('display_errors', 0);
+
 // Oturum başlat
 session_start();
 
