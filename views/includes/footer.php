@@ -4,29 +4,29 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h5>Restoran Yönetim Sistemi</h5>
-                    <p>Restoranınızı verimli bir şekilde yönetmenize yardımcı olan kapsamlı bir sistem.</p>
+                    <h5>Restaurant Management System</h5>
+                    <p>A comprehensive system to help you manage your restaurant efficiently.</p>
                 </div>
                 <div class="col-md-3">
-                    <h5>Hızlı Erişim</h5>
+                    <h5>Quick Access</h5>
                     <ul class="list-unstyled">
-                        <li><a href="index.php" class="text-white">Ana Sayfa</a></li>
-                        <li><a href="index.php?page=menu" class="text-white">Menü</a></li>
-                        <li><a href="index.php?page=orders" class="text-white">Siparişler</a></li>
+                        <li><a href="index.php" class="text-white">Home</a></li>
+                        <li><a href="index.php?page=menu" class="text-white">Menu</a></li>
+                        <li><a href="index.php?page=orders" class="text-white">Orders</a></li>
                     </ul>
                 </div>
                 <div class="col-md-3">
-                    <h5>İletişim</h5>
+                    <h5>Contact</h5>
                     <ul class="list-unstyled">
                         <li><i class="fas fa-phone me-2"></i> (555) 123-4567</li>
                         <li><i class="fas fa-envelope me-2"></i> info@restoransistemi.com</li>
-                        <li><i class="fas fa-map-marker-alt me-2"></i> İstanbul, Türkiye</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i> Istanbul, Turkey</li>
                     </ul>
                 </div>
             </div>
             <hr>
             <div class="text-center">
-                <p>&copy; <?php echo date("Y"); ?> Restoran Yönetim Sistemi. Tüm hakları saklıdır.</p>
+                <p>&copy; <?php echo date("Y"); ?> Restaurant Management System. All rights reserved.</p>
             </div>
         </div>
     </footer>

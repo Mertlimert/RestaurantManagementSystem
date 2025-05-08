@@ -8,7 +8,7 @@ if (session_status() == PHP_SESSION_NONE) { // Ensure session is started
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
     // Admin değilse veya giriş yapmamışsa, ana login sayfasına yönlendir (artık login.php)
     // Hata mesajı login.php'de gösterilebilir (örneğin session ile taşınarak)
-    $_SESSION['login_error_message'] = "Admin paneline erişmek için lütfen giriş yapın."; // Farklı bir session key kullanalım
+    $_SESSION['login_error_message'] = "Please log in to access the admin panel."; // Farklı bir session key kullanalım
     header("location: ../login.php?error=auth_required"); 
     exit;
 }
@@ -64,11 +64,11 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restoran Yönetim Sistemi - Admin Paneli</title>
+    <title>Restaurant Management System - Admin Panel</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -132,25 +132,28 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php" class="active"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php" class="active"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Gösterge Paneli</h3>
+            <h3>Dashboard</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <a href="seed_data.php" class="btn btn-warning btn-sm mr-2" onclick="return confirm('Are you sure you want to seed the database with sample data? This will add multiple records to all tables.')">
+                    <i class="fas fa-database"></i> Seed Database
+                </a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
@@ -160,7 +163,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-primary">
                         <i class="fas fa-users"></i>
                     </div>
-                    <div class="card-title">Toplam Müşteri</div>
+                    <div class="card-title">Total Customers</div>
                     <div class="card-value"><?php echo $totalCustomers; ?></div>
                 </div>
             </div>
@@ -169,7 +172,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-success">
                         <i class="fas fa-user-tie"></i>
                     </div>
-                    <div class="card-title">Toplam Çalışan</div>
+                    <div class="card-title">Total Employees</div>
                     <div class="card-value"><?php echo $totalEmployees; ?></div>
                 </div>
             </div>
@@ -178,7 +181,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-warning">
                         <i class="fas fa-chair"></i>
                     </div>
-                    <div class="card-title">Müsait Masa</div>
+                    <div class="card-title">Available Tables</div>
                     <div class="card-value"><?php echo $availableTables; ?></div>
                 </div>
             </div>
@@ -190,7 +193,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-danger">
                         <i class="fas fa-clipboard-list"></i>
                     </div>
-                    <div class="card-title">Bugünkü Siparişler</div>
+                    <div class="card-title">Today's Orders</div>
                     <div class="card-value"><?php echo $todayOrders; ?></div>
                 </div>
             </div>
@@ -199,7 +202,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-info">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <div class="card-title">Bugünkü Rezervasyonlar</div>
+                    <div class="card-title">Today's Reservations</div>
                     <div class="card-value"><?php echo $todayReservations; ?></div>
                 </div>
             </div>
@@ -208,7 +211,7 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                     <div class="card-icon text-success">
                         <i class="fas fa-lira-sign"></i>
                     </div>
-                    <div class="card-title">Bugünkü Gelir</div>
+                    <div class="card-title">Today's Revenue</div>
                     <div class="card-value"><?php echo number_format($totalRevenue, 2); ?> ₺</div>
                 </div>
             </div>
@@ -217,17 +220,17 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
         <div class="row">
             <div class="col-md-12">
                 <div class="dashboard-card">
-                    <h4>Son Siparişler</h4>
+                    <h4>Recent Orders</h4>
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Sipariş ID</th>
-                                    <th>Müşteri</th>
-                                    <th>Masa</th>
-                                    <th>Tarih</th>
-                                    <th>Tutar</th>
-                                    <th>Durum</th>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Table</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -257,21 +260,22 @@ while ($order = mysqli_fetch_assoc($orderResult)) {
                                     
                                     echo "<tr>";
                                     echo "<td>" . $order['order_id'] . "</td>";
-                                    echo "<td>" . ($order['first_name'] ? $order['first_name'] . ' ' . $order['last_name'] : 'Misafir') . "</td>";
+                                    echo "<td>" . ($order['first_name'] ? $order['first_name'] . ' ' . $order['last_name'] : 'Guest') . "</td>";
                                     echo "<td>" . $order['table_id'] . "</td>";
                                     echo "<td>" . date('d.m.Y H:i', strtotime($order['order_date'])) . "</td>";
                                     echo "<td>" . number_format($order['total_amount'], 2) . " ₺</td>";
-                                    echo "<td><span class='badge badge-" . $status_color . "'>" . $order['order_status'] . "</span></td>";
+                                    echo "<td><span class=\"badge badge-" . $status_color . "\">" . ucfirst($order['order_status']) . "</span></td>";
                                     echo "</tr>";
                                 }
                                 
                                 if ($count == 0) {
-                                    echo "<tr><td colspan='6' class='text-center'>Sipariş bulunmamaktadır.</td></tr>";
+                                    echo "<tr><td colspan='6' class='text-center'>No orders found.</td></tr>";
                                 }
                                 ?>
                             </tbody>
                         </table>
                     </div>
+                    <a href="orders.php" class="btn btn-outline-primary btn-sm">View All Orders</a>
                 </div>
             </div>
         </div>

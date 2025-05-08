@@ -21,9 +21,9 @@ $ingredientModel = new Ingredient($conn);
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $ingredient_id = $_GET['delete'];
     if ($ingredientModel->deleteIngredient($ingredient_id)) {
-        $success_msg = "Malzeme başarıyla silindi.";
+        $success_msg = "Ingredient deleted successfully.";
     } else {
-        $error_msg = "Malzeme silinemedi. Bu malzeme bir menü öğesi için kullanılıyor olabilir.";
+        $error_msg = "Ingredient could not be deleted. It might be used in a menu item.";
     }
 }
 
@@ -46,11 +46,11 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Malzeme Yönetimi - Restoran Yönetim Sistemi</title>
+    <title>Ingredient Management - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -106,29 +106,29 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php" class="active"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php" class="active"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Malzeme Yönetimi</h3>
+            <h3>Ingredient Management</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -149,8 +149,8 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
         
         <?php if(mysqli_num_rows($low_stock_ingredients) > 0): ?>
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <h5><i class="fas fa-exclamation-triangle"></i> Stok Uyarısı</h5>
-                <p>Aşağıdaki malzemelerin stok miktarı düşük:</p>
+                <h5><i class="fas fa-exclamation-triangle"></i> Stock Alert</h5>
+                <p>The stock quantity for the following ingredients is low:</p>
                 <ul>
                     <?php while($item = mysqli_fetch_assoc($low_stock_ingredients)): ?>
                         <li>
@@ -167,9 +167,9 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Malzeme Listesi</h5>
+                <h5 class="mb-0">Ingredient List</h5>
                 <button type="button" class="btn btn-add btn-sm" data-toggle="modal" data-target="#addIngredientModal">
-                    <i class="fas fa-plus"></i> Yeni Malzeme Ekle
+                    <i class="fas fa-plus"></i> Add New Ingredient
                 </button>
             </div>
             <div class="card-body">
@@ -178,11 +178,11 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Malzeme Adı</th>
-                                <th>Birim</th>
-                                <th>Stok Miktarı</th>
-                                <th>Alerjen</th>
-                                <th>İşlemler</th>
+                                <th>Ingredient Name</th>
+                                <th>Unit</th>
+                                <th>Stock Quantity</th>
+                                <th>Allergen</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -199,18 +199,18 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
                                     echo "<td>" . (empty($ingredient['allergen']) ? '-' : htmlspecialchars($ingredient['allergen'])) . "</td>";
                                     echo "<td>
                                             <a href='edit_ingredient.php?id=" . $ingredient['ingredient_id'] . "' class='btn btn-primary btn-sm'><i class='fas fa-edit'></i></a>
-                                            <a href='ingredients.php?delete=" . $ingredient['ingredient_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu malzemeyi silmek istediğinize emin misiniz?\")'><i class='fas fa-trash'></i></a>
+                                            <a href='ingredients.php?delete=" . $ingredient['ingredient_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this ingredient?\")'><i class='fas fa-trash'></i></a>
                                             <button type='button' class='btn btn-success btn-sm' data-toggle='modal' data-target='#stockModal' 
                                                 data-id='" . $ingredient['ingredient_id'] . "' 
                                                 data-name='" . htmlspecialchars($ingredient['ingredient_name']) . "' 
                                                 data-unit='" . htmlspecialchars($ingredient['unit']) . "'>
-                                                <i class='fas fa-plus-circle'></i> Stok Ekle
+                                                <i class='fas fa-plus-circle'></i> Add Stock
                                             </button>
                                           </td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='6' class='text-center'>Malzeme bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='6' class='text-center'>No ingredients found.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -220,12 +220,12 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
         </div>
     </div>
     
-    <!-- Malzeme Ekleme Modal -->
+    <!-- Add Ingredient Modal -->
     <div class="modal fade" id="addIngredientModal" tabindex="-1" role="dialog" aria-labelledby="addIngredientModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addIngredientModalLabel">Yeni Malzeme Ekle</h5>
+                    <h5 class="modal-title" id="addIngredientModalLabel">Add New Ingredient</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -233,88 +233,70 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
                 <form action="add_ingredient.php" method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="ingredient_name">Malzeme Adı</label>
+                            <label for="ingredient_name">Ingredient Name</label>
                             <input type="text" class="form-control" id="ingredient_name" name="ingredient_name" required>
                         </div>
                         <div class="form-group">
-                            <label for="unit">Birim</label>
+                            <label for="unit">Unit</label>
                             <select class="form-control" id="unit" name="unit" required>
                                 <option value="kg">Kilogram (kg)</option>
                                 <option value="g">Gram (g)</option>
-                                <option value="litre">Litre (lt)</option>
-                                <option value="ml">Mililitre (ml)</option>
-                                <option value="adet">Adet</option>
-                                <option value="paket">Paket</option>
-                                <option value="porsiyon">Porsiyon</option>
+                                <option value="litre">Liter (lt)</option>
+                                <option value="ml">Milliliter (ml)</option>
+                                <option value="adet">Piece(s)</option>
+                                <option value="paket">Package</option>
+                                <option value="porsiyon">Portion</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="stock_quantity">Stok Miktarı</label>
+                            <label for="stock_quantity">Initial Stock Quantity</label>
                             <input type="number" step="0.01" class="form-control" id="stock_quantity" name="stock_quantity" value="0" required>
                         </div>
                         <div class="form-group">
-                            <label for="allergen">Alerjen (varsa)</label>
-                            <select class="form-control" id="allergen" name="allergen">
-                                <option value="">Alerjen Yok</option>
-                                <option value="Gluten">Gluten</option>
-                                <option value="Süt">Süt</option>
-                                <option value="Yumurta">Yumurta</option>
-                                <option value="Fıstık">Fıstık</option>
-                                <option value="Kabuklu Yemiş">Kabuklu Yemiş</option>
-                                <option value="Soya">Soya</option>
-                                <option value="Balık">Balık</option>
-                                <option value="Kabuklu Deniz Ürünü">Kabuklu Deniz Ürünü</option>
-                            </select>
+                            <label for="allergen">Allergen Information (Optional)</label>
+                            <input type="text" class="form-control" id="allergen" name="allergen">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- Stok Ekleme Modal -->
+    <!-- Update Stock Modal -->
     <div class="modal fade" id="stockModal" tabindex="-1" role="dialog" aria-labelledby="stockModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="stockModalLabel">Stok Ekle</h5>
+                    <h5 class="modal-title" id="stockModalLabel">Update Stock</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="update_stock.php" method="post">
+                <form action="edit_ingredient.php" method="post"> 
                     <div class="modal-body">
-                        <input type="hidden" name="ingredient_id" id="modal-ingredient-id">
-                        
+                        <input type="hidden" name="ingredient_id" id="stock_ingredient_id">
+                        <p><strong>Ingredient Name:</strong> <span id="stock_ingredient_name"></span></p>
+                        <p><strong>Current Stock:</strong> <span id="current_stock"></span> <span id="stock_unit"></span></p>
                         <div class="form-group">
-                            <label>Malzeme:</label>
-                            <div id="modal-ingredient-name"></div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="quantity_change">Eklenecek Miktar:</label>
-                            <div class="input-group">
-                                <input type="number" step="0.01" class="form-control" id="quantity_change" name="quantity_change" required>
-                                <div class="input-group-append">
-                                    <span class="input-group-text" id="modal-ingredient-unit"></span>
-                                </div>
-                            </div>
+                            <label for="quantity_to_add">Quantity to Add</label>
+                            <input type="number" step="0.01" class="form-control" id="quantity_to_add" name="quantity_to_add" required>
+                            <small>Use negative numbers to decrease stock.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Ekle</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" name="update_stock" class="btn btn-success">Update</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
@@ -326,9 +308,9 @@ $low_stock_ingredients = $ingredientModel->getLowStockIngredients(10);
             var unit = button.data('unit');
             
             var modal = $(this);
-            modal.find('#modal-ingredient-id').val(id);
-            modal.find('#modal-ingredient-name').text(name);
-            modal.find('#modal-ingredient-unit').text(unit);
+            modal.find('#stock_ingredient_id').val(id);
+            modal.find('#stock_ingredient_name').text(name);
+            modal.find('#stock_unit').text(unit);
         });
     </script>
 </body>

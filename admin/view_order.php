@@ -1,92 +1,84 @@
 <?php
-// Oturum başlat
+// Start session
 session_start();
 
-// Kullanıcı giriş yapmış mı kontrol et
+// Check if user is logged in
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Veritabanı bağlantısını dahil et
+// Include database connection
 require_once '../config/database.php';
 
-// Model sınıfını dahil et
+// Include model class
 require_once '../models/Order.php';
 
-// Sipariş modeli oluştur
+// Create order model
 $orderModel = new Order($conn);
 
-// ID parametresi kontrolü
+// Check ID parameter
 if (isset($_GET["id"]) && !empty(trim($_GET["id"]))) {
-    // URL'den ID parametresini al
+    // Get ID parameter from URL
     $order_id = trim($_GET["id"]);
 
-    // Sipariş bilgilerini getir
+    // Get order information
     $order = $orderModel->getOrderById($order_id);
 
     if (!$order) {
-        // Sipariş bulunamadı, siparişler sayfasına yönlendir
+        // Order not found, redirect to orders page
         header("location: orders.php");
         exit();
     }
     
-    // Sipariş detaylarını getir
+    // Get order details
     $orderDetails = $orderModel->getOrderDetails($order_id);
     
-    // Sipariş ödemesini getir (varsa)
+    // Get order payment (if any)
     $payment = $orderModel->getPaymentByOrderId($order_id);
 } else {
-    // URL'de ID parametresi yok, siparişler sayfasına yönlendir
+    // ID parameter not in URL, redirect to orders page
     header("location: orders.php");
     exit();
 }
 
-// Sipariş durumu için Türkçe metin ve sınıf belirle
+// Determine English text and class for order status
 $status_class = '';
 switch($order['order_status']) {
-    case 'new':
+    case 'ordered':
         $status_class = 'badge-primary';
-        $status_text = 'Yeni';
+        $status_text = 'Ordered';
         break;
     case 'preparing':
         $status_class = 'badge-warning';
-        $status_text = 'Hazırlanıyor';
+        $status_text = 'Preparing';
         break;
-    case 'ready':
+    case 'served':
         $status_class = 'badge-success';
-        $status_text = 'Hazır';
-        break;
-    case 'delivered':
-        $status_class = 'badge-secondary';
-        $status_text = 'Teslim Edildi';
+        $status_text = 'Served';
         break;
     case 'paid':
         $status_class = 'badge-info';
-        $status_text = 'Ödendi';
-        break;
-    case 'cancelled':
-        $status_class = 'badge-danger';
-        $status_text = 'İptal Edildi';
+        $status_text = 'Paid';
         break;
     default:
         $status_text = $order['order_status'];
         $status_class = 'badge-secondary';
 }
 
-// Müşteri adı
-$customer_name = isset($order['first_name']) ? $order['first_name'] . ' ' . $order['last_name'] : 'Misafir';
+// Customer name
+$customer_name = isset($order['first_name']) ? $order['first_name'] . ' ' . $order['last_name'] : 'Guest';
 
-// Personel adı
+// Employee name
 $employee_name = isset($order['employee_first_name']) ? $order['employee_first_name'] . ' ' . $order['employee_last_name'] : '-';
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sipariş Detayı - Restoran Yönetim Sistemi</title>
+    <title>Order Details - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -148,45 +140,45 @@ $employee_name = isset($order['employee_first_name']) ? $order['employee_first_n
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Sipariş Detayı</h3>
+            <h3>Order Details</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Sipariş #<?php echo $order_id; ?></h5>
+                <h5 class="mb-0">Order #<?php echo $order_id; ?></h5>
                 <div>
                     <?php if($order['order_status'] !== 'paid' && !$payment): ?>
                     <a href="add_payment.php?id=<?php echo $order_id; ?>" class="btn btn-success btn-sm">
-                        <i class="fas fa-money-bill-wave"></i> Ödeme Ekle
+                        <i class="fas fa-money-bill-wave"></i> Add Payment
                     </a>
                     <?php endif; ?>
                     <a href="edit_order.php?id=<?php echo $order_id; ?>" class="btn btn-primary btn-sm">
-                        <i class="fas fa-edit"></i> Düzenle
+                        <i class="fas fa-edit"></i> Edit
                     </a>
                     <button type="button" class="btn btn-info btn-sm" onclick="window.print()">
-                        <i class="fas fa-print"></i> Yazdır
+                        <i class="fas fa-print"></i> Print
                     </button>
                     <a href="orders.php" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> Geri
+                        <i class="fas fa-arrow-left"></i> Back
                     </a>
                 </div>
             </div>
@@ -194,48 +186,48 @@ $employee_name = isset($order['employee_first_name']) ? $order['employee_first_n
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Sipariş Tarihi:</div>
+                            <div class="col-md-4 info-label">Order Date:</div>
                             <div class="col-md-8"><?php echo date('d.m.Y H:i', strtotime($order['order_date'])); ?></div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Müşteri:</div>
+                            <div class="col-md-4 info-label">Customer:</div>
                             <div class="col-md-8"><?php echo htmlspecialchars($customer_name); ?></div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Masa:</div>
+                            <div class="col-md-4 info-label">Table:</div>
                             <div class="col-md-8"><?php echo $order['table_id']; ?></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Durum:</div>
+                            <div class="col-md-4 info-label">Status:</div>
                             <div class="col-md-8">
                                 <span class="badge <?php echo $status_class; ?>"><?php echo $status_text; ?></span>
                             </div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Personel:</div>
+                            <div class="col-md-4 info-label">Staff:</div>
                             <div class="col-md-8"><?php echo htmlspecialchars($employee_name); ?></div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Toplam Tutar:</div>
+                            <div class="col-md-4 info-label">Total Amount:</div>
                             <div class="col-md-8 price"><?php echo number_format($order['total_amount'], 2); ?> ₺</div>
                         </div>
                     </div>
                 </div>
                 
-                <h6 class="border-bottom pb-2 mb-3">Sipariş Detayları</h6>
+                <h6 class="border-bottom pb-2 mb-3">Order Items</h6>
                 
                 <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Ürün</th>
-                                <th>Kategori</th>
-                                <th>Birim Fiyat</th>
-                                <th>Adet</th>
-                                <th>Toplam</th>
-                                <th>Özel İstek</th>
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Unit Price</th>
+                                <th>Quantity</th>
+                                <th>Total</th>
+                                <th>Special Instructions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -252,18 +244,18 @@ $employee_name = isset($order['employee_first_name']) ? $order['employee_first_n
                                     echo "<td>" . number_format($item['price'], 2) . " ₺</td>";
                                     echo "<td>" . $item['quantity'] . "</td>";
                                     echo "<td>" . number_format($item_total, 2) . " ₺</td>";
-                                    echo "<td>" . (empty($item['special_instructions']) ? '-' : htmlspecialchars($item['special_instructions'])) . "</td>";
+                                    echo "<td>" . htmlspecialchars($item['special_instructions']) . "</td>";
                                     echo "</tr>";
                                 }
                                 
-                                // Toplam satırı
+                                // Total row
                                 echo "<tr class='total-row'>";
-                                echo "<td colspan='4' class='text-right'>Toplam:</td>";
+                                echo "<td colspan='4' class='text-right'>Total:</td>";
                                 echo "<td>" . number_format($subtotal, 2) . " ₺</td>";
                                 echo "<td></td>";
                                 echo "</tr>";
                             } else {
-                                echo "<tr><td colspan='6' class='text-center'>Bu sipariş için ürün bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='6' class='text-center'>No items found for this order.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -271,22 +263,22 @@ $employee_name = isset($order['employee_first_name']) ? $order['employee_first_n
                 </div>
                 
                 <?php if($payment): ?>
-                <h6 class="border-bottom pb-2 mb-3 mt-4">Ödeme Bilgileri</h6>
+                <h6 class="border-bottom pb-2 mb-3 mt-4">Payment Information</h6>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Ödeme Yöntemi:</div>
+                            <div class="col-md-4 info-label">Payment Method:</div>
                             <div class="col-md-8">
                                 <?php 
                                 switch($payment['payment_method']) {
                                     case 'cash':
-                                        echo 'Nakit';
+                                        echo 'Cash';
                                         break;
                                     case 'credit_card':
-                                        echo 'Kredi Kartı';
+                                        echo 'Credit Card';
                                         break;
                                     case 'debit_card':
-                                        echo 'Banka Kartı';
+                                        echo 'Debit Card';
                                         break;
                                     default:
                                         echo $payment['payment_method'];
@@ -295,17 +287,17 @@ $employee_name = isset($order['employee_first_name']) ? $order['employee_first_n
                             </div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Ödeme Tarihi:</div>
+                            <div class="col-md-4 info-label">Payment Date:</div>
                             <div class="col-md-8"><?php echo date('d.m.Y H:i', strtotime($payment['payment_date'])); ?></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Tutar:</div>
+                            <div class="col-md-4 info-label">Amount:</div>
                             <div class="col-md-8"><?php echo number_format($payment['total_amount'], 2); ?> ₺</div>
                         </div>
                         <div class="row info-row">
-                            <div class="col-md-4 info-label">Bahşiş:</div>
+                            <div class="col-md-4 info-label">Tip:</div>
                             <div class="col-md-8"><?php echo number_format($payment['tip_amount'], 2); ?> ₺</div>
                         </div>
                     </div>

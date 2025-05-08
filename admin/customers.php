@@ -21,9 +21,9 @@ $customerModel = new Customer($conn);
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $customer_id = $_GET['delete'];
     if ($customerModel->deleteCustomerSafely($customer_id)) {
-        $success_msg = "Müşteri başarıyla silindi.";
+        $success_msg = "Customer deleted successfully.";
     } else {
-        $error_msg = "Müşteri silinemedi.";
+        $error_msg = "Customer could not be deleted.";
     }
 }
 
@@ -32,11 +32,11 @@ $customers = $customerModel->getAllCustomers();
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Müşteri Yönetimi - Restoran Yönetim Sistemi</title>
+    <title>Customer Management - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -88,29 +88,29 @@ $customers = $customerModel->getAllCustomers();
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php" class="active"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php" class="active"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Müşteri Yönetimi</h3>
+            <h3>Customer Management</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -131,9 +131,9 @@ $customers = $customerModel->getAllCustomers();
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Müşteri Listesi</h5>
+                <h5 class="mb-0">Customer List</h5>
                 <button type="button" class="btn btn-add btn-sm" data-toggle="modal" data-target="#addCustomerModal">
-                    <i class="fas fa-plus"></i> Yeni Müşteri Ekle
+                    <i class="fas fa-plus"></i> Add New Customer
                 </button>
             </div>
             <div class="card-body">
@@ -142,12 +142,12 @@ $customers = $customerModel->getAllCustomers();
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Ad</th>
-                                <th>Soyad</th>
-                                <th>Telefon</th>
-                                <th>E-posta</th>
-                                <th>Adres</th>
-                                <th>İşlemler</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -163,12 +163,12 @@ $customers = $customerModel->getAllCustomers();
                                     echo "<td>" . $customer['address'] . "</td>";
                                     echo "<td>
                                             <a href='edit_customer.php?id=" . $customer['customer_id'] . "' class='btn btn-primary btn-sm'><i class='fas fa-edit'></i></a>
-                                            <a href='customers.php?delete=" . $customer['customer_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu müşteriyi silmek istediğinize emin misiniz?\")'><i class='fas fa-trash'></i></a>
+                                            <a href='customers.php?delete=" . $customer['customer_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this customer?\")'><i class='fas fa-trash'></i></a>
                                           </td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='7' class='text-center'>Müşteri bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='7' class='text-center'>No customers found.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -178,12 +178,12 @@ $customers = $customerModel->getAllCustomers();
         </div>
     </div>
     
-    <!-- Müşteri Ekleme Modal -->
+    <!-- Add Customer Modal -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addCustomerModalLabel">Yeni Müşteri Ekle</h5>
+                    <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -191,29 +191,29 @@ $customers = $customerModel->getAllCustomers();
                 <form action="add_customer.php" method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="first_name">Ad</label>
+                            <label for="first_name">First Name</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" required>
                         </div>
                         <div class="form-group">
-                            <label for="last_name">Soyad</label>
+                            <label for="last_name">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
                         </div>
                         <div class="form-group">
-                            <label for="phone_number">Telefon</label>
+                            <label for="phone_number">Phone</label>
                             <input type="text" class="form-control" id="phone_number" name="phone_number">
                         </div>
                         <div class="form-group">
-                            <label for="email">E-posta</label>
+                            <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email">
                         </div>
                         <div class="form-group">
-                            <label for="address">Adres</label>
+                            <label for="address">Address</label>
                             <textarea class="form-control" id="address" name="address" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>

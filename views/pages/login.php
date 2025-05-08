@@ -11,13 +11,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // E-posta ve şifre 
     if(empty(trim($_POST["email"]))) {
-        $error = "Lütfen e-posta adresinizi girin.";
+        $error = "Please enter your email address.";
     } else {
         $email = clean_input($_POST["email"]);
     }
     
     if(empty($error) && empty(trim($_POST["password"]))) {
-        $error = "Lütfen şifrenizi girin.";
+        $error = "Please enter your password.";
     } else {
         $password = clean_input($_POST["password"]);
     }
@@ -58,14 +58,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                             // Ana sayfaya yönlendir
                             redirect("index.php");
                         } else {
-                            $error = "Girilen şifre yanlış.";
+                            $error = "The password entered is incorrect.";
                         }
                     }
                 } else {
-                    $error = "Geçersiz e-posta adresi.";
+                    $error = "Invalid email address.";
                 }
             } else {
-                $error = "Bir şeyler yanlış gitti, lütfen daha sonra tekrar deneyin.";
+                $error = "Something went wrong, please try again later.";
             }
 
             // Statementı kapat
@@ -79,7 +79,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="col-md-6 col-lg-5">
         <div class="card shadow">
             <div class="card-header bg-primary text-white text-center py-3">
-                <h4 class="mb-0">Giriş Yap</h4>
+                <h4 class="mb-0">Login</h4>
             </div>
             <div class="card-body p-4">
                 <?php if(!empty($error)): ?>
@@ -88,27 +88,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]) . '?page=login'; ?>" method="post">
                     <div class="mb-3">
-                        <label for="email" class="form-label">E-posta Adresi</label>
+                        <label for="email" class="form-label">Email Address</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" placeholder="E-posta adresinizi girin" required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label">Şifre</label>
+                        <label for="password" class="form-label">Password</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Şifrenizi girin" required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                         </div>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                        <button type="submit" class="btn btn-primary">Login</button>
                     </div>
                 </form>
             </div>
             <div class="card-footer text-center py-3 bg-light">
                 <p class="mb-0">
-                    <small class="text-muted">Örnek giriş: admin@restoransistemi.com / 1234</small>
+                    <small class="text-muted">Sample login: admin@restoransistemi.com / 1234</small>
                 </p>
             </div>
         </div>

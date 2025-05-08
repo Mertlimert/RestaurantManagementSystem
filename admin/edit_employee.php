@@ -1,29 +1,29 @@
 <?php
-// Oturum başlat
+// Start session
 session_start();
 
-// Kullanıcı giriş yapmış mı kontrol et
+// Check if user is logged in
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Veritabanı bağlantısını dahil et
+// Include database connection
 require_once '../config/database.php';
 
-// Model sınıfını dahil et
+// Include model class
 require_once '../models/Employee.php';
 
-// Çalışan modeli oluştur
+// Create employee model
 $employeeModel = new Employee($conn);
 
-// Hata ve başarı mesajları için değişkenler
+// Variables for error and success messages
 $error_msg = '';
 $success_msg = '';
 
-// Form gönderildiğinde
+// When form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Çalışan bilgilerini al
+    // Get employee information
     $employee_id = $_POST["employee_id"];
     $first_name = $_POST["first_name"];
     $last_name = $_POST["last_name"];
@@ -33,43 +33,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $hourly_rate = $_POST["hourly_rate"];
     $hire_date = $_POST["hire_date"];
 
-    // Çalışanı güncelle
+    // Update employee
     if ($employeeModel->updateEmployee($employee_id, $first_name, $last_name, $position_id, $phone_number, $email, $hourly_rate, $hire_date)) {
-        $success_msg = "Çalışan bilgileri başarıyla güncellendi.";
+        $success_msg = "Employee information updated successfully.";
     } else {
-        $error_msg = "Çalışan bilgileri güncellenirken bir hata oluştu.";
+        $error_msg = "An error occurred while updating employee information.";
     }
 }
 
-// ID parametresi kontrolü
+// Check ID parameter
 if (isset($_GET["id"]) && !empty(trim($_GET["id"]))) {
-    // URL'den ID parametresini al
+    // Get ID parameter from URL
     $employee_id = trim($_GET["id"]);
 
-    // Çalışan bilgilerini getir
+    // Get employee information
     $employee_data = $employeeModel->getEmployeeById($employee_id);
 
     if (!$employee_data) {
-        // Çalışan bulunamadı, ana sayfaya yönlendir
+        // Employee not found, redirect to employees page
         header("location: employees.php");
         exit();
     }
 } else {
-    // URL'de ID parametresi yok, ana sayfaya yönlendir
+    // ID parameter not in URL, redirect to employees page
     header("location: employees.php");
     exit();
 }
 
-// Tüm pozisyonları getir
+// Get all positions
 $positions = $employeeModel->getAllPositions();
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çalışan Düzenle - Restoran Yönetim Sistemi</title>
+    <title>Edit Employee - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -117,29 +117,29 @@ $positions = $employeeModel->getAllPositions();
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php" class="active"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php" class="active"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Çalışan Düzenle</h3>
+            <h3>Edit Employee</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg) && !empty($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -160,24 +160,24 @@ $positions = $employeeModel->getAllPositions();
         
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Çalışan Bilgilerini Düzenle</h5>
+                <h5 class="mb-0">Edit Employee Information</h5>
             </div>
             <div class="card-body">
                 <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
                     <input type="hidden" name="employee_id" value="<?php echo $employee_data['employee_id']; ?>">
                     
                     <div class="form-group">
-                        <label for="first_name">Ad</label>
+                        <label for="first_name">First Name</label>
                         <input type="text" class="form-control" id="first_name" name="first_name" value="<?php echo $employee_data['first_name']; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="last_name">Soyad</label>
+                        <label for="last_name">Last Name</label>
                         <input type="text" class="form-control" id="last_name" name="last_name" value="<?php echo $employee_data['last_name']; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="position_id">Pozisyon</label>
+                        <label for="position_id">Position</label>
                         <select class="form-control" id="position_id" name="position_id" required>
                             <?php
                             while ($position = mysqli_fetch_assoc($positions)) {
@@ -189,28 +189,28 @@ $positions = $employeeModel->getAllPositions();
                     </div>
                     
                     <div class="form-group">
-                        <label for="phone_number">Telefon</label>
+                        <label for="phone_number">Phone</label>
                         <input type="text" class="form-control" id="phone_number" name="phone_number" value="<?php echo $employee_data['phone_number']; ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="email">E-posta</label>
+                        <label for="email">Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="<?php echo $employee_data['email']; ?>">
                     </div>
                     
                     <div class="form-group">
-                        <label for="hourly_rate">Saatlik Ücret (₺)</label>
+                        <label for="hourly_rate">Hourly Rate (₺)</label>
                         <input type="number" step="0.1" class="form-control" id="hourly_rate" name="hourly_rate" value="<?php echo $employee_data['hourly_rate']; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="hire_date">İşe Başlama Tarihi</label>
+                        <label for="hire_date">Hire Date</label>
                         <input type="date" class="form-control" id="hire_date" name="hire_date" value="<?php echo $employee_data['hire_date']; ?>" required>
                     </div>
                     
                     <div class="form-group">
-                        <a href="employees.php" class="btn btn-secondary">İptal</a>
-                        <button type="submit" class="btn btn-primary">Güncelle</button>
+                        <a href="employees.php" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                 </form>
             </div>

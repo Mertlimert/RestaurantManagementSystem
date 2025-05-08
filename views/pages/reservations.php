@@ -16,7 +16,7 @@ if(isset($_POST['add_reservation'])) {
     
     // Basit validasyon
     if(empty($reservation_date) || empty($reservation_time) || empty($number_of_guests) || empty($table_id)) {
-        $error = "Tarih, saat, misafir sayısı ve masa seçimi zorunludur.";
+        $error = "Date, time, number of guests, and table selection are required.";
     } else {
         // Müşteri ID'si yoksa yeni müşteri ekle
         if(empty($customer_id) && !empty($customer_name) && !empty($customer_phone)) {
@@ -34,7 +34,7 @@ if(isset($_POST['add_reservation'])) {
         $reservation_id = uniqid('RES_');
         $sql = "INSERT INTO RESERVATION (reservation_id, customer_id, reservation_date, reservation_time, 
                 number_of_guests, reservation_status, table_id) 
-                VALUES (?, ?, ?, ?, ?, 'Onaylandı', ?)";
+                VALUES (?, ?, ?, ?, ?, 'Confirmed', ?)";
                 
         if($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "ssssss", $reservation_id, $customer_id, $reservation_date, 
@@ -42,16 +42,16 @@ if(isset($_POST['add_reservation'])) {
             
             if(mysqli_stmt_execute($stmt)) {
                 // Masa durumunu güncelle
-                $update_table = "UPDATE `TABLE` SET table_status = 'Rezerve' WHERE table_id = ?";
+                $update_table = "UPDATE `TABLE` SET table_status = 'Reserved' WHERE table_id = ?";
                 if($table_stmt = mysqli_prepare($conn, $update_table)) {
                     mysqli_stmt_bind_param($table_stmt, "s", $table_id);
                     mysqli_stmt_execute($table_stmt);
                     mysqli_stmt_close($table_stmt);
                 }
                 
-                $success = "Rezervasyon başarıyla oluşturuldu.";
+                $success = "Reservation created successfully.";
             } else {
-                $error = "Rezervasyon oluşturulurken bir hata oluştu.";
+                $error = "An error occurred while creating the reservation.";
             }
             
             mysqli_stmt_close($stmt);
@@ -88,7 +88,7 @@ if(mysqli_num_rows($result) > 0) {
 
 // Masaları getir
 $tables = array();
-$sql = "SELECT table_id, number, capacity FROM `TABLE` WHERE table_status = 'Boş' ORDER BY number";
+$sql = "SELECT table_id, number, capacity FROM `TABLE` WHERE table_status = 'Empty' ORDER BY number";
 $result = mysqli_query($conn, $sql);
 if(mysqli_num_rows($result) > 0) {
     while($row = mysqli_fetch_assoc($result)) {
@@ -100,15 +100,15 @@ if(mysqli_num_rows($result) > 0) {
 }
 ?>
 
-<h2 class="mb-4">Rezervasyon Yönetimi</h2>
+<h2 class="mb-4">Reservation Management</h2>
 
 <div class="row mb-4">
     <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Rezervasyonlar</h5>
+                <h5 class="mb-0">Reservations</h5>
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addReservationModal">
-                    <i class="fas fa-plus me-1"></i> Yeni Rezervasyon
+                    <i class="fas fa-plus me-1"></i> New Reservation
                 </button>
             </div>
             <div class="card-body">
@@ -124,29 +124,29 @@ if(mysqli_num_rows($result) > 0) {
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Müşteri</th>
-                                <th>Tarih/Saat</th>
-                                <th>Masa</th>
-                                <th>Kişi Sayısı</th>
-                                <th>Durum</th>
-                                <th>İşlemler</th>
+                                <th>Customer</th>
+                                <th>Date/Time</th>
+                                <th>Table</th>
+                                <th>Number of People</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if(count($reservations) > 0): ?>
                                 <?php foreach($reservations as $reservation): ?>
                                 <tr>
-                                    <td><?php echo $reservation['customer_name'] ? $reservation['customer_name'] : 'Belirtilmemiş'; ?></td>
+                                    <td><?php echo $reservation['customer_name'] ? $reservation['customer_name'] : 'Not specified'; ?></td>
                                     <td><?php echo date('d.m.Y H:i', strtotime($reservation['reservation_date'] . ' ' . $reservation['reservation_time'])); ?></td>
-                                    <td>Masa <?php echo $reservation['table_number']; ?></td>
-                                    <td><?php echo $reservation['number_of_guests']; ?> kişi</td>
+                                    <td>Table <?php echo $reservation['table_number']; ?></td>
+                                    <td><?php echo $reservation['number_of_guests']; ?> people</td>
                                     <td>
-                                        <?php if($reservation['reservation_status'] == 'Onaylandı'): ?>
-                                            <span class="badge bg-success">Onaylandı</span>
-                                        <?php elseif($reservation['reservation_status'] == 'Bekliyor'): ?>
-                                            <span class="badge bg-warning text-dark">Bekliyor</span>
-                                        <?php elseif($reservation['reservation_status'] == 'İptal Edildi'): ?>
-                                            <span class="badge bg-danger">İptal Edildi</span>
+                                        <?php if($reservation['reservation_status'] == 'Confirmed'): ?>
+                                            <span class="badge bg-success">Confirmed</span>
+                                        <?php elseif($reservation['reservation_status'] == 'Pending'): ?>
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        <?php elseif($reservation['reservation_status'] == 'Cancelled'): ?>
+                                            <span class="badge bg-danger">Cancelled</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
@@ -163,7 +163,7 @@ if(mysqli_num_rows($result) > 0) {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">Henüz rezervasyon bulunmuyor.</td>
+                                    <td colspan="6" class="text-center">No reservations found yet.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
@@ -179,15 +179,15 @@ if(mysqli_num_rows($result) > 0) {
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Yeni Rezervasyon</h5>
+                <h5 class="modal-title">New Reservation</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="index.php?page=reservations" method="post">
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="customer_id" class="form-label">Müşteri</label>
+                        <label for="customer_id" class="form-label">Customer</label>
                         <select class="form-select" id="customer_id" name="customer_id">
-                            <option value="" selected>Seçiniz veya yeni ekleyin</option>
+                            <option value="" selected>Select or add new</option>
                             <?php foreach($customers as $id => $customer): ?>
                                 <option value="<?php echo $id; ?>"><?php echo $customer['name'] . ' (' . $customer['phone'] . ')'; ?></option>
                             <?php endforeach; ?>
@@ -196,46 +196,46 @@ if(mysqli_num_rows($result) > 0) {
                     
                     <div id="new_customer_fields">
                         <div class="mb-3">
-                            <label for="customer_name" class="form-label">Müşteri Adı</label>
+                            <label for="customer_name" class="form-label">Customer Name</label>
                             <input type="text" class="form-control" id="customer_name" name="customer_name">
                         </div>
                         <div class="mb-3">
-                            <label for="customer_phone" class="form-label">Telefon</label>
+                            <label for="customer_phone" class="form-label">Phone</label>
                             <input type="text" class="form-control" id="customer_phone" name="customer_phone">
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="reservation_date" class="form-label">Tarih</label>
+                            <label for="reservation_date" class="form-label">Date</label>
                             <input type="date" class="form-control" id="reservation_date" name="reservation_date" min="<?php echo date('Y-m-d'); ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="reservation_time" class="form-label">Saat</label>
+                            <label for="reservation_time" class="form-label">Time</label>
                             <input type="time" class="form-control" id="reservation_time" name="reservation_time" required>
                         </div>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="number_of_guests" class="form-label">Misafir Sayısı</label>
+                        <label for="number_of_guests" class="form-label">Number of Guests</label>
                         <input type="number" min="1" class="form-control" id="number_of_guests" name="number_of_guests" required>
                     </div>
                     
                     <div class="mb-3">
-                        <label for="table_id" class="form-label">Masa</label>
+                        <label for="table_id" class="form-label">Table</label>
                         <select class="form-select" id="table_id" name="table_id" required>
-                            <option value="" selected disabled>Masa Seçin</option>
+                            <option value="" selected disabled>Select Table</option>
                             <?php foreach($tables as $id => $table): ?>
                                 <option value="<?php echo $id; ?>">
-                                    Masa <?php echo $table['number']; ?> (<?php echo $table['capacity']; ?> kişilik)
+                                    Masa <?php echo $table['number']; ?> (<?php echo $table['capacity']; ?> people capacity)
                                 </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                    <button type="submit" name="add_reservation" class="btn btn-primary">Rezervasyon Oluştur</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" name="add_reservation" class="btn btn-primary">Create Reservation</button>
                 </div>
             </form>
         </div>

@@ -21,9 +21,9 @@ $employeeModel = new Employee($conn);
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $employee_id = $_GET['delete'];
     if ($employeeModel->deleteEmployee($employee_id)) {
-        $success_msg = "Çalışan başarıyla silindi.";
+        $success_msg = "Employee deleted successfully.";
     } else {
-        $error_msg = "Çalışan silinemedi.";
+        $error_msg = "Employee could not be deleted.";
     }
 }
 
@@ -46,11 +46,11 @@ $positions = $employeeModel->getAllPositions();
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Çalışan Yönetimi - Restoran Yönetim Sistemi</title>
+    <title>Employee Management - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -102,29 +102,29 @@ $positions = $employeeModel->getAllPositions();
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php" class="active"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php" class="active"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Çalışan Yönetimi</h3>
+            <h3>Employee Management</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -145,9 +145,9 @@ $positions = $employeeModel->getAllPositions();
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Çalışan Listesi</h5>
+                <h5 class="mb-0">Employee List</h5>
                 <button type="button" class="btn btn-add btn-sm" data-toggle="modal" data-target="#addEmployeeModal">
-                    <i class="fas fa-plus"></i> Yeni Çalışan Ekle
+                    <i class="fas fa-plus"></i> Add New Employee
                 </button>
             </div>
             <div class="card-body">
@@ -156,14 +156,14 @@ $positions = $employeeModel->getAllPositions();
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Ad</th>
-                                <th>Soyad</th>
-                                <th>Pozisyon</th>
-                                <th>Telefon</th>
-                                <th>E-posta</th>
-                                <th>Saatlik Ücret</th>
-                                <th>İşe Başlama</th>
-                                <th>İşlemler</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Position</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Hourly Rate</th>
+                                <th>Hire Date</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -181,13 +181,13 @@ $positions = $employeeModel->getAllPositions();
                                     echo "<td>" . date('d.m.Y', strtotime($employee['hire_date'])) . "</td>";
                                     echo "<td>
                                             <a href='edit_employee.php?id=" . $employee['employee_id'] . "' class='btn btn-primary btn-sm'><i class='fas fa-edit'></i></a>
-                                            <a href='employees.php?delete=" . $employee['employee_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu çalışanı silmek istediğinize emin misiniz?\")'><i class='fas fa-trash'></i></a>
+                                            <a href='employees.php?delete=" . $employee['employee_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this employee?\")'><i class='fas fa-trash'></i></a>
                                             <a href='employee_shifts.php?id=" . $employee['employee_id'] . "' class='btn btn-info btn-sm'><i class='fas fa-calendar-alt'></i></a>
                                           </td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='9' class='text-center'>Çalışan bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='9' class='text-center'>No employees found.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -196,12 +196,12 @@ $positions = $employeeModel->getAllPositions();
             </div>
         </div>
         
-        <!-- Pozisyonlar Kartı -->
+        <!-- Positions Card -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Pozisyonlar</h5>
+                <h5 class="mb-0">Positions</h5>
                 <button type="button" class="btn btn-add btn-sm" data-toggle="modal" data-target="#addPositionModal">
-                    <i class="fas fa-plus"></i> Yeni Pozisyon Ekle
+                    <i class="fas fa-plus"></i> Add New Position
                 </button>
             </div>
             <div class="card-body">
@@ -210,8 +210,8 @@ $positions = $employeeModel->getAllPositions();
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Pozisyon Adı</th>
-                                <th>İşlemler</th>
+                                <th>Position Name</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -223,12 +223,12 @@ $positions = $employeeModel->getAllPositions();
                                     echo "<td>" . $position['title'] . "</td>";
                                     echo "<td>
                                             <a href='edit_position.php?id=" . $position['position_id'] . "' class='btn btn-primary btn-sm'><i class='fas fa-edit'></i></a>
-                                            <a href='delete_position.php?id=" . $position['position_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu pozisyonu silmek istediğinize emin misiniz?\")'><i class='fas fa-trash'></i></a>
+                                            <a href='delete_position.php?id=" . $position['position_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Are you sure you want to delete this position?\")'><i class='fas fa-trash'></i></a>
                                           </td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='3' class='text-center'>Pozisyon bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='3' class='text-center'>No positions found.</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -238,12 +238,12 @@ $positions = $employeeModel->getAllPositions();
         </div>
     </div>
     
-    <!-- Çalışan Ekleme Modal -->
+    <!-- Add Employee Modal -->
     <div class="modal fade" id="addEmployeeModal" tabindex="-1" role="dialog" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addEmployeeModalLabel">Yeni Çalışan Ekle</h5>
+                    <h5 class="modal-title" id="addEmployeeModalLabel">Add New Employee</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -251,57 +251,64 @@ $positions = $employeeModel->getAllPositions();
                 <form action="add_employee.php" method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="first_name">Ad</label>
+                            <label for="first_name">First Name</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" required>
                         </div>
                         <div class="form-group">
-                            <label for="last_name">Soyad</label>
+                            <label for="last_name">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" required>
                         </div>
                         <div class="form-group">
-                            <label for="position_id">Pozisyon</label>
+                            <label for="position_id">Position</label>
                             <select class="form-control" id="position_id" name="position_id" required>
-                                <option value="">Pozisyon Seçin</option>
-                                <?php
-                                mysqli_data_seek($positions, 0); // Sonuç kümesini başa sar
-                                while ($position = mysqli_fetch_assoc($positions)) {
-                                    echo "<option value='" . $position['position_id'] . "'>" . $position['title'] . "</option>";
+                                <option value="">Select Position</option>
+                                <?php 
+                                // Pozisyonları tekrar getir
+                                $allPositions = $employeeModel->getAllPositions();
+                                if(mysqli_num_rows($allPositions) > 0){
+                                    while($pos = mysqli_fetch_assoc($allPositions)){
+                                        echo "<option value='" . $pos['position_id'] . "'>" . htmlspecialchars($pos['title']) . "</option>";
+                                    }
                                 }
                                 ?>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="phone_number">Telefon</label>
-                            <input type="text" class="form-control" id="phone_number" name="phone_number">
+                            <label for="phone_number">Phone Number</label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" required>
                         </div>
                         <div class="form-group">
-                            <label for="email">E-posta</label>
-                            <input type="email" class="form-control" id="email" name="email">
+                            <label for="email">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
                         </div>
                         <div class="form-group">
-                            <label for="hourly_rate">Saatlik Ücret (₺)</label>
-                            <input type="number" step="0.1" class="form-control" id="hourly_rate" name="hourly_rate" required>
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                         <div class="form-group">
+                            <label for="hourly_rate">Hourly Rate (₺)</label>
+                            <input type="number" step="0.01" class="form-control" id="hourly_rate" name="hourly_rate" required>
                         </div>
                         <div class="form-group">
-                            <label for="hire_date">İşe Başlama Tarihi</label>
-                            <input type="date" class="form-control" id="hire_date" name="hire_date" required>
+                            <label for="hire_date">Hire Date</label>
+                            <input type="date" class="form-control" id="hire_date" name="hire_date" value="<?php echo date('Y-m-d'); ?>" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- Pozisyon Ekleme Modal -->
+    <!-- Add Position Modal -->
     <div class="modal fade" id="addPositionModal" tabindex="-1" role="dialog" aria-labelledby="addPositionModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addPositionModalLabel">Yeni Pozisyon Ekle</h5>
+                    <h5 class="modal-title" id="addPositionModalLabel">Add New Position</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -309,13 +316,13 @@ $positions = $employeeModel->getAllPositions();
                 <form action="add_position.php" method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="title">Pozisyon Adı</label>
+                            <label for="title">Position Name</label>
                             <input type="text" class="form-control" id="title" name="title" required>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>

@@ -23,9 +23,9 @@ $ingredientModel = new Ingredient($conn);
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $menu_item_id = $_GET['delete'];
     if ($menuItemModel->deleteMenuItem($menu_item_id)) {
-        $success_msg = "Menü öğesi başarıyla silindi.";
+        $success_msg = "Menu item deleted successfully.";
     } else {
-        $error_msg = "Menü öğesi silinemedi.";
+        $error_msg = "Menu item could not be deleted.";
     }
 }
 
@@ -57,11 +57,11 @@ mysqli_data_seek($menuItems, 0);
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menü Yönetimi - Restoran Yönetim Sistemi</title>
+    <title>Menu Management - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -127,29 +127,29 @@ mysqli_data_seek($menuItems, 0);
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php" class="active"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php" class="active"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Menü Yönetimi</h3>
+            <h3>Menu Management</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -170,13 +170,13 @@ mysqli_data_seek($menuItems, 0);
         
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Menü Öğeleri</h5>
+                <h5 class="mb-0">Menu Items</h5>
                 <div>
                     <button type="button" class="btn btn-primary btn-sm mr-2" data-toggle="modal" data-target="#viewMenuModal">
-                        <i class="fas fa-list"></i> Listeyi Görüntüle
+                        <i class="fas fa-list"></i> View List
                     </button>
                     <button type="button" class="btn btn-add btn-sm" data-toggle="modal" data-target="#addMenuItemModal">
-                        <i class="fas fa-plus"></i> Yeni Menü Öğesi Ekle
+                        <i class="fas fa-plus"></i> Add New Menu Item
                     </button>
                 </div>
             </div>
@@ -196,13 +196,13 @@ mysqli_data_seek($menuItems, 0);
                                         <p class="price"><?php echo number_format($item['price'], 2); ?> ₺</p>
                                         <div class="btn-group">
                                             <a href="edit_menu_item.php?id=<?php echo $item['menu_item_id']; ?>" class="btn btn-primary btn-sm">
-                                                <i class="fas fa-edit"></i> Düzenle
+                                                <i class="fas fa-edit"></i> Edit
                                             </a>
                                             <a href="view_menu_item.php?id=<?php echo $item['menu_item_id']; ?>" class="btn btn-info btn-sm">
-                                                <i class="fas fa-info-circle"></i> Detaylar
+                                                <i class="fas fa-info-circle"></i> Details
                                             </a>
-                                            <a href="menu.php?delete=<?php echo $item['menu_item_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Bu menü öğesini silmek istediğinize emin misiniz?')">
-                                                <i class="fas fa-trash"></i> Sil
+                                            <a href="menu.php?delete=<?php echo $item['menu_item_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this menu item?')">
+                                                <i class="fas fa-trash"></i> Delete
                                             </a>
                                         </div>
                                     </div>
@@ -215,12 +215,12 @@ mysqli_data_seek($menuItems, 0);
         </div>
     </div>
     
-    <!-- Menü Öğesi Ekleme Modal -->
+    <!-- Add Menu Item Modal -->
     <div class="modal fade" id="addMenuItemModal" tabindex="-1" role="dialog" aria-labelledby="addMenuItemModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addMenuItemModalLabel">Yeni Menü Öğesi Ekle</h5>
+                    <h5 class="modal-title" id="addMenuItemModalLabel">Add New Menu Item</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -228,91 +228,84 @@ mysqli_data_seek($menuItems, 0);
                 <form action="add_menu_item.php" method="post">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="name">İsim</label>
+                            <label for="name">Name</label>
                             <input type="text" class="form-control" id="name" name="name" required>
                         </div>
                         <div class="form-group">
-                            <label for="category">Kategori</label>
+                            <label for="category">Category</label>
                             <select class="form-control" id="category" name="category">
-                                <option value="Ana Yemek">Ana Yemek</option>
-                                <option value="Yan Yemek">Yan Yemek</option>
-                                <option value="Salata">Salata</option>
-                                <option value="Tatlı">Tatlı</option>
-                                <option value="İçecek">İçecek</option>
+                                <option value="Main Course">Main Course</option>
+                                <option value="Side Dish">Side Dish</option>
+                                <option value="Salad">Salad</option>
+                                <option value="Dessert">Dessert</option>
+                                <option value="Beverage">Beverage</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="price">Fiyat (₺)</label>
+                            <label for="price">Price (₺)</label>
                             <input type="number" step="0.01" class="form-control" id="price" name="price" required>
                         </div>
                         <div class="form-group">
-                            <label for="description">Açıklama</label>
+                            <label for="description">Description</label>
                             <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">İptal</button>
-                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- Menü Listesi Modal -->
+    <!-- Menü Listesi Görüntüleme Modal -->
     <div class="modal fade" id="viewMenuModal" tabindex="-1" role="dialog" aria-labelledby="viewMenuModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewMenuModalLabel">Menü Listesi</h5>
+                    <h5 class="modal-title" id="viewMenuModalLabel">View Menu List</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>İsim</th>
-                                    <th>Kategori</th>
-                                    <th>Fiyat</th>
-                                    <th>İşlemler</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                mysqli_data_seek($menuItems, 0);
-                                if (mysqli_num_rows($menuItems) > 0) {
-                                    while ($item = mysqli_fetch_assoc($menuItems)) {
-                                        echo "<tr>";
-                                        echo "<td>" . $item['menu_item_id'] . "</td>";
-                                        echo "<td>" . $item['name'] . "</td>";
-                                        echo "<td>" . $item['category'] . "</td>";
-                                        echo "<td>" . number_format($item['price'], 2) . " ₺</td>";
-                                        echo "<td>
-                                                <a href='edit_menu_item.php?id=" . $item['menu_item_id'] . "' class='btn btn-primary btn-sm'><i class='fas fa-edit'></i></a>
-                                                <a href='view_menu_item.php?id=" . $item['menu_item_id'] . "' class='btn btn-info btn-sm'><i class='fas fa-info-circle'></i></a>
-                                                <a href='menu.php?delete=" . $item['menu_item_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu menü öğesini silmek istediğinize emin misiniz?\")'><i class='fas fa-trash'></i></a>
-                                              </td>";
-                                        echo "</tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='5' class='text-center'>Menü öğesi bulunmamaktadır.</td></tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
+                    <div class="list-group">
+                        <?php 
+                        // Kategorilere göre listele
+                        foreach ($categories as $category => $items): 
+                        ?>
+                            <h5 class="mt-3"><?php echo htmlspecialchars($category); ?></h5>
+                            <table class="table table-sm table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <?php if (count($items) > 0): ?>
+                                    <?php foreach ($items as $item): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($item['name']); ?></td>
+                                            <td><?php echo number_format($item['price'], 2); ?> ₺</td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr><td colspan="2" class="text-center">No items found in this category.</td></tr>
+                                <?php endif; ?>
+                                </tbody>
+                            </table>
+                        <?php endforeach; ?>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

@@ -26,10 +26,10 @@ if (isset($_GET['menu_id']) && !empty($_GET['menu_id']) && isset($_GET['ingredie
     // Menü öğesinden malzeme çıkar
     if ($menuItemModel->removeIngredientFromMenuItem($menu_item_id, $ingredient_id)) {
         // Başarıyla silindi
-        $_SESSION['success_msg'] = "Malzeme başarıyla kaldırıldı.";
+        $_SESSION['success_msg'] = "Ingredient removed successfully.";
     } else {
         // Hata oluştu
-        $_SESSION['error_msg'] = "Malzeme kaldırılırken bir hata oluştu.";
+        $_SESSION['error_msg'] = "An error occurred while removing the ingredient.";
     }
     
     // Düzenleme sayfasına yönlendir

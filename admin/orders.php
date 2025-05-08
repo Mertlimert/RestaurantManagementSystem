@@ -38,9 +38,9 @@ $to_date = isset($_GET['to_date']) ? $_GET['to_date'] : '';
 if (isset($_GET['delete']) && !empty($_GET['delete'])) {
     $order_id = $_GET['delete'];
     if ($orderModel->deleteOrder($order_id)) {
-        $success_msg = "Sipariş başarıyla silindi.";
+        $success_msg = "Order deleted successfully.";
     } else {
-        $error_msg = "Sipariş silinemedi.";
+        $error_msg = "Order could not be deleted.";
     }
 }
 
@@ -49,9 +49,9 @@ if (isset($_GET['update_status']) && !empty($_GET['update_status']) && isset($_G
     $order_id = $_GET['update_status'];
     $new_status = $_GET['status'];
     if ($orderModel->updateOrderStatus($order_id, $new_status)) {
-        $success_msg = "Sipariş durumu başarıyla güncellendi.";
+        $success_msg = "Order status updated successfully.";
     } else {
-        $error_msg = "Sipariş durumu güncellenemedi.";
+        $error_msg = "Order status could not be updated.";
     }
 }
 
@@ -68,12 +68,12 @@ if (isset($_SESSION['error_msg'])) {
 
 // Siparişleri getir (filtreli veya filtresiz)
 $orders = null;
-$filter_title = "Tüm Siparişler";
+$filter_title = "All Orders";
 
 if ($table_filter) {
     $orders = $orderModel->getOrdersByTable($table_filter);
     $table = $tableModel->getTableById($table_filter);
-    $filter_title = "Masa " . $table_filter . " Siparişleri";
+    $filter_title = "Table " . $table_filter . "'s Orders";
 } elseif ($customer_filter) {
     if (!empty($from_date) || !empty($to_date)) {
         $orders = $orderModel->getOrdersByCustomerAndDateRange($customer_filter, $from_date, $to_date);
@@ -81,7 +81,7 @@ if ($table_filter) {
         $orders = $orderModel->getOrdersByCustomer($customer_filter);
     }
     $customer = $customerModel->getCustomerById($customer_filter);
-    $filter_title = $customer['first_name'] . ' ' . $customer['last_name'] . " Siparişleri";
+    $filter_title = $customer['first_name'] . ' ' . $customer['last_name'] . "'s Orders";
 } elseif ($employee_filter) {
     if (!empty($from_date) || !empty($to_date)) {
         $orders = $orderModel->getOrdersByEmployeeAndDateRange($employee_filter, $from_date, $to_date);
@@ -89,20 +89,20 @@ if ($table_filter) {
         $orders = $orderModel->getOrdersByEmployee($employee_filter);
     }
     $employee = $employeeModel->getEmployeeById($employee_filter);
-    $filter_title = $employee['first_name'] . ' ' . $employee['last_name'] . " Siparişleri";
+    $filter_title = $employee['first_name'] . ' ' . $employee['last_name'] . "'s Orders";
 } elseif (!empty($from_date) || !empty($to_date)) {
     // Tarih aralığına göre filtreleme
     // İki tarih de varsa
     if (!empty($from_date) && !empty($to_date)) {
-        $filter_title = $from_date . " - " . $to_date . " Arası Siparişler";
+        $filter_title = $from_date . " - " . $to_date . " Orders Between";
     } 
     // Sadece başlangıç tarihi varsa
     elseif (!empty($from_date)) {
-        $filter_title = $from_date . " Sonrası Siparişler";
+        $filter_title = $from_date . " Orders After";
     } 
     // Sadece bitiş tarihi varsa
     else {
-        $filter_title = $to_date . " Öncesi Siparişler";
+        $filter_title = $to_date . " Orders Before";
     }
 }
 
@@ -113,11 +113,11 @@ if ($orders === null) {
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sipariş Yönetimi - Restoran Yönetim Sistemi</title>
+    <title>Order Management - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -198,29 +198,29 @@ if ($orders === null) {
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Sipariş Yönetimi</h3>
+            <h3>Order Management</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
-        <!-- Mesajlar -->
+        <!-- Messages -->
         <?php if(isset($success_msg)): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo $success_msg; ?>
@@ -245,11 +245,11 @@ if ($orders === null) {
                 <div>
                     <?php if ($table_filter || $customer_filter || $employee_filter || !empty($from_date) || !empty($to_date)): ?>
                         <a href="orders.php" class="btn btn-secondary btn-sm mr-2">
-                            <i class="fas fa-filter"></i> Filtreleri Sıfırla
+                            <i class="fas fa-filter"></i> Reset Filters
                         </a>
                     <?php endif; ?>
-                    <a href="add_order.php<?php echo $table_filter ? '?table_id='.$table_filter : ''; ?>" class="btn btn-add btn-sm">
-                        <i class="fas fa-plus"></i> Yeni Sipariş Ekle
+                    <a href="add_order.php" class="btn btn-add btn-sm">
+                        <i class="fas fa-plus"></i> Add New Order
                     </a>
                 </div>
             </div>
@@ -260,9 +260,9 @@ if ($orders === null) {
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="customer_id">Müşteri Filtrele</label>
+                                <label for="customer_id">Customer Filter</label>
                                 <select class="form-control" id="customer_id" name="customer_id">
-                                    <option value="">-- Müşteri Seçin --</option>
+                                    <option value="">-- Select Customer --</option>
                                     <?php while ($customer = mysqli_fetch_assoc($customers)): ?>
                                         <option value="<?php echo $customer['customer_id']; ?>" <?php echo ($customer_filter == $customer['customer_id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($customer['first_name'] . ' ' . $customer['last_name']); ?>
@@ -273,9 +273,9 @@ if ($orders === null) {
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="employee_id">Çalışan Filtrele</label>
+                                <label for="employee_id">Employee Filter</label>
                                 <select class="form-control" id="employee_id" name="employee_id">
-                                    <option value="">-- Çalışan Seçin --</option>
+                                    <option value="">-- Select Employee --</option>
                                     <?php while ($employee = mysqli_fetch_assoc($employees)): ?>
                                         <option value="<?php echo $employee['employee_id']; ?>" <?php echo ($employee_filter == $employee['employee_id']) ? 'selected' : ''; ?>>
                                             <?php echo htmlspecialchars($employee['first_name'] . ' ' . $employee['last_name']); ?>
@@ -286,18 +286,18 @@ if ($orders === null) {
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label for="from_date">Başlangıç Tarihi</label>
+                                <label for="from_date">Start Date</label>
                                 <input type="date" class="form-control" id="from_date" name="from_date" value="<?php echo $from_date; ?>">
                             </div>
                         </div>
                         <div class="col-md-2">
                             <div class="form-group">
-                                <label for="to_date">Bitiş Tarihi</label>
+                                <label for="to_date">End Date</label>
                                 <input type="date" class="form-control" id="to_date" name="to_date" value="<?php echo $to_date; ?>">
                             </div>
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary btn-block">Filtrele</button>
+                            <button type="submit" class="btn btn-primary btn-block">Filter</button>
                         </div>
                     </div>
                 </form>
@@ -308,87 +308,76 @@ if ($orders === null) {
                     <table class="table table-striped table-hover">
                         <thead>
                             <tr>
-                                <th>Sipariş No</th>
-                                <th>Tarih</th>
-                                <th>Müşteri</th>
-                                <th>Personel</th>
-                                <th>Masa</th>
-                                <th>Toplam</th>
-                                <th>Durum</th>
-                                <th>İşlemler</th>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Table</th>
+                                <th>Staff</th>
+                                <th>Date</th>
+                                <th>Total Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             if (mysqli_num_rows($orders) > 0) {
                                 while ($order = mysqli_fetch_assoc($orders)) {
-                                    // Sipariş durumu için badge sınıfını belirle
                                     $status_class = '';
-                                    switch($order['order_status']) {
-                                        case 'new':
-                                            $status_class = 'status-new';
-                                            $status_text = 'Yeni';
+                                    $status_text = '';
+                                    switch ($order['order_status']) {
+                                        case 'ordered':
+                                            $status_class = 'status-ordered';
+                                            $status_text = 'Ordered';
                                             break;
                                         case 'preparing':
                                             $status_class = 'status-preparing';
-                                            $status_text = 'Hazırlanıyor';
+                                            $status_text = 'Preparing';
                                             break;
-                                        case 'ready':
-                                            $status_class = 'status-ready';
-                                            $status_text = 'Hazır';
-                                            break;
-                                        case 'delivered':
-                                            $status_class = 'status-delivered';
-                                            $status_text = 'Teslim Edildi';
+                                        case 'served':
+                                            $status_class = 'status-served';
+                                            $status_text = 'Served';
                                             break;
                                         case 'paid':
                                             $status_class = 'status-paid';
-                                            $status_text = 'Ödendi';
-                                            break;
-                                        case 'cancelled':
-                                            $status_class = 'status-cancelled';
-                                            $status_text = 'İptal Edildi';
+                                            $status_text = 'Paid';
                                             break;
                                         default:
-                                            $status_text = $order['order_status'];
+                                            $status_class = 'status-unknown';
+                                            $status_text = 'Unknown';
                                     }
-                                    
-                                    // Müşteri adı
-                                    $customer_name = isset($order['first_name']) ? $order['first_name'] . ' ' . $order['last_name'] : 'Misafir';
-                                    
-                                    // Personel adı
-                                    $employee_name = isset($order['employee_first_name']) ? $order['employee_first_name'] . ' ' . $order['employee_last_name'] : '-';
                                     
                                     echo "<tr>";
                                     echo "<td>" . $order['order_id'] . "</td>";
-                                    echo "<td>" . date('d.m.Y H:i', strtotime($order['order_date'])) . "</td>";
-                                    echo "<td>" . htmlspecialchars($customer_name) . "</td>";
-                                    echo "<td>" . htmlspecialchars($employee_name) . "</td>";
+                                    echo "<td>" . (isset($order['first_name']) ? htmlspecialchars($order['first_name'] . ' ' . $order['last_name']) : 'Guest') . "</td>";
                                     echo "<td>" . $order['table_id'] . "</td>";
+                                    echo "<td>" . (isset($order['employee_first_name']) ? htmlspecialchars($order['employee_first_name'] . ' ' . $order['employee_last_name']) : '-') . "</td>";
+                                    echo "<td>" . date('d.m.Y H:i', strtotime($order['order_date'])) . "</td>";
                                     echo "<td>" . number_format($order['total_amount'], 2) . " ₺</td>";
-                                    echo "<td><span class='badge " . $status_class . "'>" . $status_text . "</span></td>";
-                                    echo "<td>
-                                            <div class='btn-group'>
-                                                <a href='view_order.php?id=" . $order['order_id'] . "' class='btn btn-info btn-sm' title='Görüntüle'><i class='fas fa-eye'></i></a>
-                                                <button type='button' class='btn btn-primary btn-sm dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false' title='Durum Güncelle'>
-                                                    <i class='fas fa-sync-alt'></i>
-                                                </button>
-                                                <div class='dropdown-menu'>
-                                                    <a class='dropdown-item' href='orders.php?update_status=" . $order['order_id'] . "&status=new'>Yeni</a>
-                                                    <a class='dropdown-item' href='orders.php?update_status=" . $order['order_id'] . "&status=preparing'>Hazırlanıyor</a>
-                                                    <a class='dropdown-item' href='orders.php?update_status=" . $order['order_id'] . "&status=ready'>Hazır</a>
-                                                    <a class='dropdown-item' href='orders.php?update_status=" . $order['order_id'] . "&status=delivered'>Teslim Edildi</a>
-                                                    <a class='dropdown-item' href='orders.php?update_status=" . $order['order_id'] . "&status=paid'>Ödendi</a>
-                                                    <div class='dropdown-divider'></div>
-                                                    <a class='dropdown-item text-danger' href='orders.php?update_status=" . $order['order_id'] . "&status=cancelled'>İptal Edildi</a>
-                                                </div>
-                                                <a href='orders.php?delete=" . $order['order_id'] . "' class='btn btn-danger btn-sm' onclick='return confirm(\"Bu siparişi silmek istediğinize emin misiniz?\")' title='Sil'><i class='fas fa-trash'></i></a>
-                                            </div>
-                                          </td>";
+                                    echo "<td><span class='status-badge " . $status_class . "'>" . $status_text . "</span></td>";
+                                    echo "<td>";
+                                    echo "<a href='view_order.php?id=" . $order['order_id'] . "' class='btn btn-info btn-sm' title='Details'><i class='fas fa-eye'></i></a> ";
+                                    echo "<a href='edit_order.php?id=" . $order['order_id'] . "' class='btn btn-primary btn-sm' title='Edit'><i class='fas fa-edit'></i></a> ";
+                                    echo "<a href='orders.php?delete=" . $order['order_id'] . "' class='btn btn-danger btn-sm' title='Delete' onclick='return confirm(\"Are you sure you want to delete this order?\")'><i class='fas fa-trash'></i></a>";
+                                    // Durum Güncelleme Dropdown
+                                    echo '<div class="btn-group ml-1">';
+                                    echo '<button type="button" class="btn btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Update Status">';
+                                    echo '<i class="fas fa-sync-alt"></i>';
+                                    echo '</button>';
+                                    echo '<div class="dropdown-menu">';
+                                    echo '<a class="dropdown-item" href="orders.php?update_status='.$order['order_id'].'&status=new">New</a>';
+                                    echo '<a class="dropdown-item" href="orders.php?update_status='.$order['order_id'].'&status=preparing">Preparing</a>';
+                                    echo '<a class="dropdown-item" href="orders.php?update_status='.$order['order_id'].'&status=ready">Ready</a>';
+                                    echo '<a class="dropdown-item" href="orders.php?update_status='.$order['order_id'].'&status=delivered">Delivered</a>';
+                                    echo '<a class="dropdown-item" href="orders.php?update_status='.$order['order_id'].'&status=paid">Paid</a>';
+                                    echo '<div class="dropdown-divider"></div>';
+                                    echo '<a class="dropdown-item text-danger" href="orders.php?update_status='.$order['order_id'].'&status=cancelled">Cancelled</a>';
+                                    echo '</div>';
+                                    echo '</div>';
+                                    echo "</td>";
                                     echo "</tr>";
                                 }
                             } else {
-                                echo "<tr><td colspan='8' class='text-center'>Sipariş bulunmamaktadır.</td></tr>";
+                                echo "<tr><td colspan='8' class='text-center'>No orders found.</td></tr>";
                             }
                             ?>
                         </tbody>

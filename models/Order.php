@@ -101,7 +101,7 @@ class Order {
         return mysqli_stmt_execute($stmt);
     }
     
-    // Sipariş detaylarını sil
+    // Delete order details by order id and menu item id
     public function deleteOrderDetail($order_id, $menu_item_id) {
         $query = "DELETE FROM OrderDetails WHERE order_id = ? AND menu_item_id = ?";
         $stmt = mysqli_prepare($this->conn, $query);

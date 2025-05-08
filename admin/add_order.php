@@ -1,49 +1,49 @@
 <?php
-// Hata raporlamayı devre dışı bırak
+// Disable error reporting
 error_reporting(0);
 ini_set('display_errors', 0);
 
-// Oturum başlat
+// Start session
 session_start();
 
-// Kullanıcı giriş yapmış mı kontrol et
+// Check if user is logged in
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: ../login.php");
     exit;
 }
 
-// Veritabanı bağlantısını dahil et
+// Include database connection
 require_once '../config/database.php';
 
-// Model sınıflarını dahil et
+// Include model classes
 require_once '../models/Order.php';
 require_once '../models/Customer.php';
 require_once '../models/Employee.php';
 require_once '../models/Tables.php';
 require_once '../models/MenuItem.php';
 
-// Modelleri oluştur
+// Create models
 $orderModel = new Order($conn);
 $customerModel = new Customer($conn);
 $employeeModel = new Employee($conn);
 $tableModel = new Tables($conn);
 $menuItemModel = new MenuItem($conn);
 
-// Form gönderildiğinde
+// When form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Form verilerini al
+    // Get form data
     $customer_id = $_POST["customer_id"];
     $employee_id = $_POST["employee_id"];
     $table_id = $_POST["table_id"];
     
-    // Sipariş oluştur
+    // Create order
     $order_id = $orderModel->addOrder($customer_id, $employee_id, $table_id);
     
     if ($order_id) {
-        // Masanın durumunu "dolu" olarak güncelle
+        // Update table status to "occupied"
         $tableModel->updateTableStatus($table_id, "occupied");
         
-        // Sipariş detayları için döngü
+        // Loop for order details
         if (isset($_POST["menu_item_id"]) && is_array($_POST["menu_item_id"])) {
             $success = true;
             
@@ -51,60 +51,69 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if (!empty($_POST["menu_item_id"][$i]) && !empty($_POST["quantity"][$i])) {
                     $menu_item_id = $_POST["menu_item_id"][$i];
                     $quantity = $_POST["quantity"][$i];
-                    $price = $_POST["price"][$i];
+                    
+                    // Fetch the current price directly from the MenuItems table
+                    $menuItemQuery = "SELECT price FROM MenuItems WHERE menu_item_id = ?";
+                    $menuItemStmt = mysqli_prepare($conn, $menuItemQuery);
+                    mysqli_stmt_bind_param($menuItemStmt, "i", $menu_item_id);
+                    mysqli_stmt_execute($menuItemStmt);
+                    $menuItemResult = mysqli_stmt_get_result($menuItemStmt);
+                    $menuItemData = mysqli_fetch_assoc($menuItemResult);
+                    $price = $menuItemData['price']; // Get the actual price from menu item
+                    
                     $special_instructions = isset($_POST["special_instructions"][$i]) ? $_POST["special_instructions"][$i] : null;
                     
-                    // Sipariş detayı ekle
+                    // Add order detail
                     if (!$orderModel->addOrderDetail($order_id, $menu_item_id, $quantity, $price, $special_instructions)) {
                         $success = false;
                     }
                 }
             }
             
-            // Sipariş toplamını güncelle
+            // Update order total
             $orderModel->updateOrderTotal($order_id);
             
             if ($success) {
-                $_SESSION['success_msg'] = "Sipariş başarıyla oluşturuldu.";
+                $_SESSION['success_msg'] = "Order created successfully.";
                 header("location: view_order.php?id=" . $order_id);
                 exit();
             } else {
-                // Sipariş detayları eklenemezse ana siparişi sil
+                // If order details cannot be added, delete the main order
                 $orderModel->deleteOrder($order_id);
-                $error_msg = "Sipariş detayları eklenirken bir hata oluştu.";
+                $error_msg = "An error occurred while adding order details.";
             }
         } else {
-            // Sipariş detayları yoksa ana siparişi sil
+            // If no order details, delete the main order
             $orderModel->deleteOrder($order_id);
-            $error_msg = "Lütfen en az bir menü öğesi ekleyin.";
+            $error_msg = "Please add at least one menu item.";
         }
     } else {
-        $error_msg = "Sipariş oluşturulurken bir hata oluştu.";
+        $error_msg = "An error occurred while creating the order.";
     }
 }
 
-// Müşterileri getir
+// Get customers
 $customers = $customerModel->getAllCustomers();
 
-// Çalışanları getir
+// Get employees
 $employees = $employeeModel->getAllEmployees();
 
-// Masaları getir
+// Get tables
 $tables = $tableModel->getAllTables();
 
-// URL'den table_id parametresini al
+// Get table_id parameter from URL
 $selected_table_id = isset($_GET['table_id']) ? $_GET['table_id'] : '';
 
-// Menü öğelerini getir
+// Get menu items
 $menuItems = $menuItemModel->getAllMenuItems();
 ?>
 
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yeni Sipariş - Restoran Yönetim Sistemi</title>
+    <title>New Order - Restaurant Management System</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
     <style>
@@ -176,25 +185,25 @@ $menuItems = $menuItemModel->getAllMenuItems();
 <body>
     <!-- Sidebar -->
     <div class="sidebar col-md-2">
-        <h4 class="text-center mb-4">Admin Paneli</h4>
-        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
-        <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
-        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
-        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
-        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
-        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>
-        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Siparişler</a>
-        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Rezervasyonlar</a>
-        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Çıkış</a>
+        <h4 class="text-center mb-4">Admin Panel</h4>
+        <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
+        <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
+        <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
+        <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
+        <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
+        <a href="orders.php" class="active"><i class="fas fa-clipboard-list mr-2"></i> Orders</a>
+        <a href="reservations.php"><i class="fas fa-calendar-alt mr-2"></i> Reservations</a>
+        <a href="../logout.php"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
     </div>
     
     <!-- Main Content -->
     <div class="content col-md-10">
         <div class="top-bar d-flex justify-content-between align-items-center">
-            <h3>Yeni Sipariş Oluştur</h3>
+            <h3>Create New Order</h3>
             <div>
-                <span class="mr-3">Hoş geldiniz, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
-                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Çıkış</a>
+                <span class="mr-3">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?></span>
+                <a href="../logout.php" class="btn btn-danger btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
         </div>
         
@@ -210,15 +219,15 @@ $menuItems = $menuItemModel->getAllMenuItems();
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" id="orderForm">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Sipariş Bilgileri</h5>
+                    <h5 class="mb-0">Order Information</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="customer_id">Müşteri</label>
+                                <label for="customer_id">Customer</label>
                                 <select class="form-control" id="customer_id" name="customer_id">
-                                    <option value="">Misafir</option>
+                                    <option value="">Guest</option>
                                     <?php while ($customer = mysqli_fetch_assoc($customers)): ?>
                                         <option value="<?php echo $customer['customer_id']; ?>">
                                             <?php echo htmlspecialchars($customer['first_name'] . ' ' . $customer['last_name']); ?>
@@ -229,9 +238,9 @@ $menuItems = $menuItemModel->getAllMenuItems();
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="employee_id">Personel</label>
+                                <label for="employee_id">Staff</label>
                                 <select class="form-control" id="employee_id" name="employee_id" required>
-                                    <option value="">Personel Seçin</option>
+                                    <option value="">Select Staff</option>
                                     <?php while ($employee = mysqli_fetch_assoc($employees)): ?>
                                         <option value="<?php echo $employee['employee_id']; ?>">
                                             <?php echo htmlspecialchars($employee['first_name'] . ' ' . $employee['last_name']); ?>
@@ -242,13 +251,13 @@ $menuItems = $menuItemModel->getAllMenuItems();
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="table_id">Masa</label>
+                                <label for="table_id">Table</label>
                                 <select class="form-control" id="table_id" name="table_id" required>
-                                    <option value="">Masa Seçin</option>
+                                    <option value="">Select Table</option>
                                     <?php mysqli_data_seek($tables, 0); ?>
                                     <?php while ($table = mysqli_fetch_assoc($tables)): ?>
                                         <option value="<?php echo $table['table_id']; ?>" <?php echo $table['table_id'] == $selected_table_id ? 'selected' : ''; ?>>
-                                            Masa <?php echo htmlspecialchars($table['table_id']); ?> (<?php echo $table['capacity']; ?> kişilik)
+                                            Table <?php echo $table['table_id']; ?> (<?php echo $table['capacity']; ?> person capacity)
                                         </option>
                                     <?php endwhile; ?>
                                 </select>
@@ -259,47 +268,41 @@ $menuItems = $menuItemModel->getAllMenuItems();
             </div>
             
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Sipariş Öğeleri</h5>
+                <div class="card-header">
+                    <h5 class="mb-0">Order Items</h5>
                 </div>
                 <div class="card-body">
-                    <div id="orderItems">
-                        <!-- Sipariş öğeleri dinamik olarak buraya eklenecek -->
+                    <div id="orderItemsContainer">
+                        <!-- Order items will be added here by JavaScript -->
                     </div>
-                    
-                    <button type="button" class="btn btn-success add-item-btn" id="addItemBtn">
-                        <i class="fas fa-plus"></i> Öğe Ekle
-                    </button>
-                    
-                    <div class="order-total">
-                        Toplam: <span id="orderTotal">0.00</span> ₺
-                    </div>
+                    <button type="button" id="addItemBtn" class="btn btn-primary add-item-btn"><i class="fas fa-plus"></i> Add Item</button>
+                    <div class="order-total">Total: <span id="totalAmount">0.00</span> ₺</div>
                 </div>
             </div>
             
-            <div class="form-group">
-                <a href="orders.php" class="btn btn-secondary">İptal</a>
-                <button type="submit" class="btn btn-primary">Siparişi Oluştur</button>
+            <div class="mt-3">
+                <a href="orders.php" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success">Create Order</button>
             </div>
         </form>
     </div>
     
-    <!-- Menü Öğesi Şablonu (JavaScript ile kullanılacak) -->
+    <!-- Template for new order item -->
     <template id="orderItemTemplate">
         <div class="order-item">
-            <i class="fas fa-times remove-item" onclick="removeItem(this)"></i>
+            <i class="fas fa-trash removeItem" title="Remove Item"></i>
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-5">
                     <div class="form-group">
-                        <label>Menü Öğesi</label>
-                        <select class="form-control menu-item-select" name="menu_item_id[]" required onchange="updatePrice(this)">
-                            <option value="">Menü Öğesi Seçin</option>
+                        <label for="menu_item_id_0">Product</label>
+                        <select class="form-control menu-item-select" name="menu_item_id[]" required>
+                            <option value="">Select Product</option>
                             <?php 
-                            mysqli_data_seek($menuItems, 0); // Veritabanı sonucunu başa sar
+                            mysqli_data_seek($menuItems, 0); // Reset pointer
                             while ($item = mysqli_fetch_assoc($menuItems)): 
                             ?>
                                 <option value="<?php echo $item['menu_item_id']; ?>" data-price="<?php echo $item['price']; ?>">
-                                    <?php echo htmlspecialchars($item['name'] . ' - ' . $item['category']); ?>
+                                    <?php echo htmlspecialchars($item['name']) . " (" . $item['price'] . " ₺)"; ?>
                                 </option>
                             <?php endwhile; ?>
                         </select>
@@ -307,114 +310,125 @@ $menuItems = $menuItemModel->getAllMenuItems();
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label>Adet</label>
-                        <input type="number" class="form-control quantity-input" name="quantity[]" value="1" min="1" required onchange="calculateItemTotal(this)">
+                        <label for="quantity_0">Quantity</label>
+                        <input type="number" class="form-control quantity-input" name="quantity[]" value="1" min="1" required>
                     </div>
                 </div>
                 <div class="col-md-2">
                     <div class="form-group">
-                        <label>Birim Fiyat (₺)</label>
-                        <input type="number" step="0.01" class="form-control price-input" name="price[]" readonly>
+                        <label for="price_0">Price</label>
+                        <input type="text" class="form-control price-input" name="price[]" readonly>
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <div class="form-group">
-                        <label>Toplam (₺)</label>
-                        <input type="text" class="form-control item-total" readonly>
-                    </div>
-                </div>
-                <div class="col-md-12 mt-2">
-                    <div class="form-group">
-                        <label>Özel İstek</label>
-                        <textarea class="form-control" name="special_instructions[]" rows="2"></textarea>
+                        <label for="special_instructions_0">Special Notes</label>
+                        <input type="text" class="form-control" name="special_instructions[]">
                     </div>
                 </div>
             </div>
         </div>
     </template>
-    
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const orderItemsContainer = document.getElementById('orderItemsContainer');
+            const addItemBtn = document.getElementById('addItemBtn');
+            const orderItemTemplate = document.getElementById('orderItemTemplate');
+            let itemCounter = 0;
+
+            // Function to add a new item
+            function addNewItem() {
+                const newItem = orderItemTemplate.content.cloneNode(true);
+                const orderItemDiv = newItem.querySelector('.order-item');
+                
+                // Update IDs and names for uniqueness
+                newItem.querySelectorAll('[id^="menu_item_id_"]').forEach(el => el.id = 'menu_item_id_' + itemCounter);
+                newItem.querySelectorAll('[for^="menu_item_id_"]').forEach(el => el.htmlFor = 'menu_item_id_' + itemCounter);
+                
+                newItem.querySelectorAll('[id^="quantity_"]').forEach(el => el.id = 'quantity_' + itemCounter);
+                newItem.querySelectorAll('[for^="quantity_"]').forEach(el => el.htmlFor = 'quantity_' + itemCounter);
+                
+                newItem.querySelectorAll('[id^="price_"]').forEach(el => el.id = 'price_' + itemCounter);
+                newItem.querySelectorAll('[for^="price_"]').forEach(el => el.htmlFor = 'price_' + itemCounter);
+
+                newItem.querySelectorAll('[id^="special_instructions_"]').forEach(el => el.id = 'special_instructions_' + itemCounter);
+                newItem.querySelectorAll('[for^="special_instructions_"]').forEach(el => el.htmlFor = 'special_instructions_' + itemCounter);
+
+                orderItemsContainer.appendChild(newItem);
+                
+                // Attach event listeners to the new item
+                const newOrderItem = orderItemsContainer.lastElementChild;
+                attachEventListenersToItem(newOrderItem.previousElementSibling); // The actual div is inside the template's document fragment
+
+                itemCounter++;
+                updateTotal();
+            }
+
+            // Function to remove an item
+            function removeItem(event) {
+                if (event.target.classList.contains('removeItem')) {
+                    event.target.closest('.order-item').remove();
+                    updateTotal();
+                }
+            }
+
+            // Function to auto-fill price and update total for an item
+            function updateItemPriceAndTotal(itemDiv) {
+                const menuItemSelect = itemDiv.querySelector('.menu-item-select');
+                const quantityInput = itemDiv.querySelector('.quantity-input');
+                const priceInput = itemDiv.querySelector('.price-input');
+                
+                const selectedOption = menuItemSelect.options[menuItemSelect.selectedIndex];
+                const price = selectedOption ? parseFloat(selectedOption.dataset.price) : 0;
+                const quantity = parseInt(quantityInput.value) || 0;
+                
+                priceInput.value = price.toFixed(2);
+                // No individual total for item, only overall total
+                updateTotal();
+            }
+            
+            // Function to update the grand total
+            function updateTotal() {
+                let totalAmount = 0;
+                document.querySelectorAll('.order-item').forEach(item => {
+                    const priceInput = item.querySelector('.price-input');
+                    const quantityInput = item.querySelector('.quantity-input');
+                    if (priceInput && quantityInput) {
+                        const price = parseFloat(priceInput.value) || 0;
+                        const quantity = parseInt(quantityInput.value) || 0;
+                        totalAmount += price * quantity;
+                    }
+                });
+                document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            }
+
+            // Attach event listeners to an item
+            function attachEventListenersToItem(itemDiv) {
+                const menuItemSelect = itemDiv.querySelector('.menu-item-select');
+                const quantityInput = itemDiv.querySelector('.quantity-input');
+
+                if (menuItemSelect) {
+                    menuItemSelect.addEventListener('change', () => updateItemPriceAndTotal(itemDiv));
+                }
+                if (quantityInput) {
+                    quantityInput.addEventListener('input', () => updateItemPriceAndTotal(itemDiv));
+                }
+            }
+
+            // Event listener for adding a new item
+            addItemBtn.addEventListener('click', addNewItem);
+
+            // Event listener for removing an item (delegated)
+            orderItemsContainer.addEventListener('click', removeItem);
+
+            // Add an initial item when the page loads
+            addNewItem();
+        });
+    </script>
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // Sayfa yüklendiğinde bir öğe ekle
-        document.addEventListener('DOMContentLoaded', function() {
-            addItem();
-        });
-        
-        // Yeni bir sipariş öğesi ekle
-        function addItem() {
-            const template = document.getElementById('orderItemTemplate');
-            const orderItems = document.getElementById('orderItems');
-            
-            const clone = document.importNode(template.content, true);
-            orderItems.appendChild(clone);
-        }
-        
-        // Sipariş öğesini kaldır
-        function removeItem(element) {
-            const item = element.closest('.order-item');
-            item.remove();
-            updateOrderTotal();
-        }
-        
-        // Menü öğesi seçildiğinde fiyatı güncelle
-        function updatePrice(selectElement) {
-            const item = selectElement.closest('.order-item');
-            const selectedOption = selectElement.options[selectElement.selectedIndex];
-            const price = selectedOption.getAttribute('data-price');
-            
-            const priceInput = item.querySelector('.price-input');
-            priceInput.value = price;
-            
-            calculateItemTotal(item.querySelector('.quantity-input'));
-        }
-        
-        // Öğe toplamını hesapla
-        function calculateItemTotal(inputElement) {
-            const item = inputElement.closest('.order-item');
-            const quantity = item.querySelector('.quantity-input').value;
-            const price = item.querySelector('.price-input').value;
-            
-            const total = quantity * price;
-            item.querySelector('.item-total').value = total.toFixed(2);
-            
-            updateOrderTotal();
-        }
-        
-        // Sipariş toplamını güncelle
-        function updateOrderTotal() {
-            let total = 0;
-            const itemTotals = document.querySelectorAll('.item-total');
-            
-            itemTotals.forEach(function(element) {
-                if (element.value) {
-                    total += parseFloat(element.value);
-                }
-            });
-            
-            document.getElementById('orderTotal').textContent = total.toFixed(2);
-        }
-        
-        // "Öğe Ekle" düğmesine tıklandığında
-        document.getElementById('addItemBtn').addEventListener('click', addItem);
-        
-        // Form gönderilmeden önce doğrulama
-        document.getElementById('orderForm').addEventListener('submit', function(event) {
-            const menuItems = document.querySelectorAll('.menu-item-select');
-            let hasItems = false;
-            
-            menuItems.forEach(function(element) {
-                if (element.value) {
-                    hasItems = true;
-                }
-            });
-            
-            if (!hasItems) {
-                alert('Lütfen en az bir menü öğesi ekleyin.');
-                event.preventDefault();
-            }
-        });
-    </script>
 </body>
 </html> 

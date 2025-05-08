@@ -1,14 +1,14 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="jumbotron bg-light p-5 rounded">
-            <h1 class="display-4">Restoran Yönetim Sistemi'ne Hoş Geldiniz!</h1>
-            <p class="lead">Restoranınızı kolayca yönetmek için tasarlanmış kapsamlı bir sistem.</p>
+            <h1 class="display-4">Welcome to the Restaurant Management System!</h1>
+            <p class="lead">A comprehensive system designed to easily manage your restaurant.</p>
             <hr class="my-4">
-            <p>Menü yönetimi, sipariş takibi, masa rezervasyonu ve daha fazlası tek bir platform üzerinden.</p>
+            <p>Menu management, order tracking, table reservations, and more, all through a single platform.</p>
             <?php if(!is_logged_in()): ?>
-                <a class="btn btn-primary btn-lg" href="index.php?page=login" role="button">Giriş Yap</a>
+                <a class="btn btn-primary btn-lg" href="index.php?page=login" role="button">Login</a>
             <?php else: ?>
-                <a class="btn btn-primary btn-lg" href="index.php?page=dashboard" role="button">Kontrol Paneli</a>
+                <a class="btn btn-primary btn-lg" href="index.php?page=dashboard" role="button">Control Panel</a>
             <?php endif; ?>
         </div>
     </div>
@@ -20,9 +20,9 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-utensils fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Menü Yönetimi</h5>
-                    <p class="card-text">Menü öğelerini ekleyin, düzenleyin veya silin. Malzemeleri ve fiyatları yönetin.</p>
-                    <a href="index.php?page=menu" class="btn btn-outline-primary">Menüyü Yönet</a>
+                    <h5 class="card-title">Menu Management</h5>
+                    <p class="card-text">Add, edit, or delete menu items. Manage ingredients and prices.</p>
+                    <a href="index.php?page=menu" class="btn btn-outline-primary">Manage Menu</a>
                 </div>
             </div>
         </div>
@@ -30,9 +30,9 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-receipt fa-3x mb-3 text-success"></i>
-                    <h5 class="card-title">Sipariş Takibi</h5>
-                    <p class="card-text">Siparişleri oluşturun, takip edin ve tamamlayın. Müşteri bilgilerini kaydedin.</p>
-                    <a href="index.php?page=orders" class="btn btn-outline-success">Siparişleri Yönet</a>
+                    <h5 class="card-title">Order Tracking</h5>
+                    <p class="card-text">Create, track, and complete orders. Save customer information.</p>
+                    <a href="index.php?page=orders" class="btn btn-outline-success">Manage Orders</a>
                 </div>
             </div>
         </div>
@@ -40,9 +40,9 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-chair fa-3x mb-3 text-info"></i>
-                    <h5 class="card-title">Masa & Rezervasyonlar</h5>
-                    <p class="card-text">Masaları yönetin, durumlarını takip edin ve rezervasyonları planlayın.</p>
-                    <a href="index.php?page=tables" class="btn btn-outline-info">Masaları Yönet</a>
+                    <h5 class="card-title">Tables & Reservations</h5>
+                    <p class="card-text">Manage tables, track their status, and plan reservations.</p>
+                    <a href="index.php?page=tables" class="btn btn-outline-info">Manage Tables</a>
                 </div>
             </div>
         </div>
@@ -52,17 +52,17 @@
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Son Siparişler</h5>
+                    <h5 class="mb-0">Recent Orders</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>Sipariş No</th>
-                                    <th>Masa</th>
-                                    <th>Tutar</th>
-                                    <th>Durum</th>
+                                    <th>Order No</th>
+                                    <th>Table</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -76,12 +76,12 @@
                                     <td><?php echo $order['table_number']; ?></td>
                                     <td><?php echo number_format($order['total_amount'], 2) . ' ₺'; ?></td>
                                     <td>
-                                        <?php if($order['order_status'] == 'Tamamlandı'): ?>
-                                            <span class="badge bg-success">Tamamlandı</span>
-                                        <?php elseif($order['order_status'] == 'Hazırlanıyor'): ?>
-                                            <span class="badge bg-warning text-dark">Hazırlanıyor</span>
-                                        <?php elseif($order['order_status'] == 'Bekliyor'): ?>
-                                            <span class="badge bg-danger">Bekliyor</span>
+                                        <?php if($order['order_status'] == 'Completed'): ?>
+                                            <span class="badge bg-success">Completed</span>
+                                        <?php elseif($order['order_status'] == 'Preparing'): ?>
+                                            <span class="badge bg-warning text-dark">Preparing</span>
+                                        <?php elseif($order['order_status'] == 'Pending'): ?>
+                                            <span class="badge bg-danger">Pending</span>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -90,13 +90,13 @@
                                 else:
                                 ?>
                                 <tr>
-                                    <td colspan="4" class="text-center">Henüz sipariş bulunmuyor.</td>
+                                    <td colspan="4" class="text-center">No orders found yet.</td>
                                 </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
-                    <a href="index.php?page=orders" class="btn btn-sm btn-outline-primary">Tüm Siparişleri Görüntüle</a>
+                    <a href="index.php?page=orders" class="btn btn-sm btn-outline-primary">View All Orders</a>
                 </div>
             </div>
         </div>
@@ -104,7 +104,7 @@
         <div class="col-md-6 mb-4">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Masa Durumları</h5>
+                    <h5 class="mb-0">Table Statuses</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -115,21 +115,21 @@
                                 $status_class = '';
                                 $status_text = '';
                                 
-                                if($table['table_status'] == 'Boş') {
+                                if($table['table_status'] == 'Empty') {
                                     $status_class = 'bg-success';
-                                    $status_text = 'Boş';
-                                } elseif($table['table_status'] == 'Dolu') {
+                                    $status_text = 'Empty';
+                                } elseif($table['table_status'] == 'Occupied') {
                                     $status_class = 'bg-danger';
-                                    $status_text = 'Dolu';
-                                } elseif($table['table_status'] == 'Rezerve') {
+                                    $status_text = 'Occupied';
+                                } elseif($table['table_status'] == 'Reserved') {
                                     $status_class = 'bg-warning';
-                                    $status_text = 'Rezerve';
+                                    $status_text = 'Reserved';
                                 }
                         ?>
                         <div class="col-4 col-md-3 mb-3">
                             <div class="card text-center <?php echo $status_class; ?> text-white">
                                 <div class="card-body py-2">
-                                    <h5 class="mb-0">Masa <?php echo $table['number']; ?></h5>
+                                    <h5 class="mb-0">Table <?php echo $table['number']; ?></h5>
                                     <small><?php echo $status_text; ?></small>
                                 </div>
                             </div>
@@ -139,11 +139,11 @@
                         else:
                         ?>
                         <div class="col-12">
-                            <p class="text-center">Henüz masa bilgisi bulunmuyor.</p>
+                            <p class="text-center">No table information found yet.</p>
                         </div>
                         <?php endif; ?>
                     </div>
-                    <a href="index.php?page=tables" class="btn btn-sm btn-outline-success mt-2">Tüm Masaları Yönet</a>
+                    <a href="index.php?page=tables" class="btn btn-sm btn-outline-success mt-2">Manage All Tables</a>
                 </div>
             </div>
         </div>
@@ -154,8 +154,8 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-tasks fa-3x mb-3 text-primary"></i>
-                    <h5 class="card-title">Kolay Yönetim</h5>
-                    <p class="card-text">Restoran operasyonlarınızı tek bir platformdan yönetin.</p>
+                    <h5 class="card-title">Easy Management</h5>
+                    <p class="card-text">Manage your restaurant operations from a single platform.</p>
                 </div>
             </div>
         </div>
@@ -163,8 +163,8 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
-                    <h5 class="card-title">Performans Analizleri</h5>
-                    <p class="card-text">Satış, çalışan performansı ve envanter durumunu takip edin.</p>
+                    <h5 class="card-title">Performance Analytics</h5>
+                    <p class="card-text">Track sales, employee performance, and inventory status.</p>
                 </div>
             </div>
         </div>
@@ -172,8 +172,8 @@
             <div class="card h-100">
                 <div class="card-body text-center">
                     <i class="fas fa-user-friends fa-3x mb-3 text-info"></i>
-                    <h5 class="card-title">Müşteri Memnuniyeti</h5>
-                    <p class="card-text">Daha hızlı hizmet ve daha az hata ile müşteri memnuniyetini artırın.</p>
+                    <h5 class="card-title">Customer Satisfaction</h5>
+                    <p class="card-text">Increase customer satisfaction with faster service and fewer errors.</p>
                 </div>
             </div>
         </div>
