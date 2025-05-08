@@ -112,7 +112,7 @@ class Order {
     
     // Sipariş detaylarını ID ile sil
     public function deleteOrderDetailById($detail_id) {
-        $query = "DELETE FROM OrderDetails WHERE id = ?";
+        $query = "DELETE FROM OrderDetails WHERE order_detail_id = ?";
         $stmt = mysqli_prepare($this->conn, $query);
         mysqli_stmt_bind_param($stmt, "i", $detail_id);
         

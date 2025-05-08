@@ -26,38 +26,80 @@
                         <li class="nav-item">
                             <a class="nav-link" href="index.php">Ana Sayfa</a>
                         </li>
-                        <?php if(is_logged_in()): ?>
+                        <?php
+                        // Oturumun başlatıldığından emin olalım (eğer başka bir yerde başlatılmadıysa)
+                        if (session_status() == PHP_SESSION_NONE) {
+                            session_start();
+                        }
+
+                        // Admin girişi için kullanılacak session değişkenlerini kontrol et
+                        if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true && isset($_SESSION["admin"]) && $_SESSION["admin"] === true):
+                        ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=menu">Menü</a>
+                                <a class="nav-link" href="admin/index.php">Admin Paneli</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=orders">Siparişler</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=tables">Masalar</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=reservations">Rezervasyonlar</a>
-                            </li>
-                            <?php if(is_admin()): ?>
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                        Yönetim
-                                    </a>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="index.php?page=employees">Çalışanlar</a></li>
-                                        <li><a class="dropdown-item" href="index.php?page=inventory">Envanter</a></li>
-                                        <li><a class="dropdown-item" href="index.php?page=reports">Raporlar</a></li>
-                                    </ul>
-                                </li>
-                            <?php endif; ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=logout">Çıkış</a>
+                                <a class="nav-link" href="logout.php">Çıkış (<?php echo htmlspecialchars($_SESSION["username"]); ?>)</a>
                             </li>
                         <?php else: ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?page=login">Giriş</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="adminLoginDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Admin Girişi
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminLoginDropdown">
+                                    <li>
+                                        <form class="px-4 py-3" action="admin_login_handler.php" method="post">
+                                            <div class="mb-3">
+                                                <label for="adminUsername" class="form-label">Kullanıcı Adı</label>
+                                                <input type="text" class="form-control" id="adminUsername" name="username" placeholder="admin" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="adminPassword" class="form-label">Şifre</label>
+                                                <input type="password" class="form-control" id="adminPassword" name="password" placeholder="123456" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
+                            <?php
+                            // Mevcut employee login/logout (eğer varsa ve farklı bir sistemse korunabilir)
+                            // Bu örnekte admin login'e odaklanıyorum veya admin login ile birleştiriyorum.
+                            /*
+                            if(is_logged_in()): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=menu">Menü</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=orders">Siparişler</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=tables">Masalar</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=reservations">Rezervasyonlar</a>
+                                </li>
+                                <?php if(is_admin()): ?> // Bu is_admin() farklı bir admin tanımı olabilir.
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                            Yönetim (Employee)
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="index.php?page=employees">Çalışanlar</a></li>
+                                            <li><a class="dropdown-item" href="index.php?page=inventory">Envanter</a></li>
+                                            <li><a class="dropdown-item" href="index.php?page=reports">Raporlar</a></li>
+                                        </ul>
+                                    </li>
+                                <?php endif; ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=logout">Çıkış (Employee)</a>
+                                </li>
+                            <?php else: ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="index.php?page=login">Giriş (Employee)</a>
+                                </li>
+                            <?php endif; */
+                            ?>
                         <?php endif; ?>
                     </ul>
                 </div>

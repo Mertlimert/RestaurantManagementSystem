@@ -1,7 +1,7 @@
 <?php
-// Hata raporlamayı devre dışı bırak
-error_reporting(0);
-ini_set('display_errors', 0);
+// Hata raporlamayı etkinleştir (Geliştirme için)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Oturum başlat
 session_start();
@@ -68,12 +68,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action_type = "update"; // Varsayılan işlem
     
     // Ürün silme işlemi
-    if (isset($_POST["delete_item"]) && !empty($_POST["delete_item"])) {
+    if (isset($_POST["delete_item_menu_id"]) && !empty($_POST["delete_item_menu_id"])) {
         $action_type = "delete";
-        $detail_id = $_POST["delete_item"];
+        $menu_item_id_to_delete = $_POST["delete_item_menu_id"];
         
-        // Sipariş detayını doğrudan ID ile sil
-        if ($orderModel->deleteOrderDetailById($detail_id)) {
+        // Sipariş detayını order_id ve menu_item_id ile sil
+        if ($orderModel->deleteOrderDetail($order_id, $menu_item_id_to_delete)) {
             $_SESSION['success_msg'] = "Ürün başarıyla silindi.";
         } else {
             $_SESSION['error_msg'] = "Ürün silinirken bir hata oluştu.";
@@ -88,7 +88,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     
     // Yeni ürün ekleme işlemi
-    if (isset($_POST["new_menu_item_id"]) && !empty($_POST["new_menu_item_id"]) && 
+    if (isset($_POST["add_new_item_action"]) && // Check if the specific "add item" button was pressed
+        isset($_POST["new_menu_item_id"]) && !empty($_POST["new_menu_item_id"]) && 
         isset($_POST["new_quantity"]) && !empty($_POST["new_quantity"])) {
         
         $action_type = "add";
@@ -121,45 +122,67 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error_msg = "Sipariş durumu güncellenirken bir hata oluştu.";
         }
         
-        // Sipariş bilgilerini güncelle
-        $sql = "UPDATE Orders SET customer_id = ?, employee_id = ?, table_id = ? WHERE order_id = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        mysqli_stmt_bind_param($stmt, "iiii", $customer_id, $employee_id, $table_id, $order_id);
+        // Sipariş bilgilerini güncelle (bu kısım genel sipariş bilgileri için, itemlerle ilgili değil)
+        $sql_order_update = "UPDATE Orders SET customer_id = ?, employee_id = ?, table_id = ? WHERE order_id = ?";
+        $stmt_order_update = mysqli_prepare($conn, $sql_order_update);
+        mysqli_stmt_bind_param($stmt_order_update, "iiii", $customer_id, $employee_id, $table_id, $order_id);
         
-        if (mysqli_stmt_execute($stmt)) {
-            $success_msg = "Sipariş bilgileri başarıyla güncellendi.";
-            
-            // Değişiklikleri yansıtmak için siparişi yeniden yükle
-            $order = $orderModel->getOrderById($order_id);
+        if (mysqli_stmt_execute($stmt_order_update)) {
+            if (!$error_msg) { // Sadece eğer başka bir hata yoksa başarı mesajını ayarla
+                $success_msg = "Sipariş bilgileri başarıyla güncellendi.";
+            }
+            $order = $orderModel->getOrderById($order_id); // Sipariş bilgilerini yeniden yükle
         } else {
-            $error_msg = "Sipariş bilgileri güncellenirken bir hata oluştu.";
+            $error_msg = "Sipariş ana bilgileri güncellenirken bir hata oluştu: " . mysqli_error($conn);
         }
+        mysqli_stmt_close($stmt_order_update);
         
-        // Sipariş detayları güncellemesi
-        if (isset($_POST["detail_id"]) && isset($_POST["quantity"]) && isset($_POST["special_instructions"])) {
-            $details_count = count($_POST["detail_id"]);
+        // Sipariş detayları güncellemesi (ürün miktarları ve özel istekler)
+        if (isset($_POST["item_menu_ids"]) && isset($_POST["quantity"]) && isset($_POST["special_instructions"])) {
+            $item_menu_ids_posted = $_POST["item_menu_ids"];
+            $quantities_posted = $_POST["quantity"];
+            $special_instructions_posted = $_POST["special_instructions"];
             
-            for ($i = 0; $i < $details_count; $i++) {
-                $detail_id = $_POST["detail_id"][$i];
-                $quantity = $_POST["quantity"][$i];
-                $special_instructions = $_POST["special_instructions"][$i];
-                
-                // Sipariş detayını güncelle
-                $sql = "UPDATE OrderDetails SET quantity = ?, special_instructions = ? WHERE id = ?";
-                $stmt = mysqli_prepare($conn, $sql);
-                mysqli_stmt_bind_param($stmt, "isi", $quantity, $special_instructions, $detail_id);
-                mysqli_stmt_execute($stmt);
+            // Dizilerin boyutlarının eşleştiğinden emin olalım
+            if (count($item_menu_ids_posted) == count($quantities_posted) && count($item_menu_ids_posted) == count($special_instructions_posted)) {
+                for ($i = 0; $i < count($item_menu_ids_posted); $i++) {
+                    $posted_menu_item_id = $item_menu_ids_posted[$i];
+                    $posted_quantity = $quantities_posted[$i];
+                    $posted_special_instructions = $special_instructions_posted[$i];
+                    
+                    // Sipariş detayını güncelle (order_id ve menu_item_id kullanarak)
+                    $sql_detail_update = "UPDATE OrderDetails SET quantity = ?, special_instructions = ? WHERE order_id = ? AND menu_item_id = ?";
+                    $stmt_detail_update = mysqli_prepare($conn, $sql_detail_update);
+                    mysqli_stmt_bind_param($stmt_detail_update, "isii", $posted_quantity, $posted_special_instructions, $order_id, $posted_menu_item_id);
+                    
+                    if (!mysqli_stmt_execute($stmt_detail_update)) {
+                        $error_msg = "Bir ürün güncellenirken hata oluştu (Menu ID: $posted_menu_item_id): " . mysqli_error($conn);
+                        // İsteğe bağlı: Hata durumunda döngüden çıkılabilir
+                        // break; 
+                    }
+                    mysqli_stmt_close($stmt_detail_update);
+                }
+            } else {
+                $error_msg = "Ürün güncelleme verilerinde tutarsızlık.";
+            }
+            
+            if (!$error_msg) { // Eğer item güncellemelerinde hata yoksa genel başarı mesajını güçlendir
+                $success_msg = "Sipariş ve ürünler başarıyla güncellendi.";
             }
             
             // Sipariş toplamını güncelle
             $orderModel->updateOrderTotal($order_id);
             
-            // Güncellenmiş sipariş detaylarını getir
+            // Güncellenmiş sipariş detaylarını ve ana sipariş bilgilerini yeniden getir
             $orderDetails = $orderModel->getOrderDetails($order_id);
-            
-            if (!$error_msg) {
-                $success_msg = "Sipariş başarıyla güncellendi.";
-            }
+            $order = $orderModel->getOrderById($order_id); // Toplam tutar değişmiş olabilir
+        }
+
+        // Redirect to orders page if update was successful
+        if (empty($error_msg)) {
+            $_SESSION['success_msg'] = $success_msg ? $success_msg : "Sipariş başarıyla güncellendi.";
+            header("Location: orders.php");
+            exit();
         }
     }
 }
@@ -353,7 +376,7 @@ $status_options = array(
                                     while ($table = mysqli_fetch_assoc($tables)): 
                                     ?>
                                         <option value="<?php echo $table['table_id']; ?>" <?php echo ($order['table_id'] == $table['table_id']) ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($table['table_number'] . ' (' . $table['capacity'] . ' kişilik)'); ?>
+                                            <?php echo htmlspecialchars('Masa ' . $table['table_id'] . ' (' . $table['capacity'] . ' kişilik)'); ?>
                                         </option>
                                     <?php endwhile; ?>
                                 </select>
@@ -401,6 +424,7 @@ $status_options = array(
                         while ($item = mysqli_fetch_assoc($orderDetails)) {
                             $item_total = $item['quantity'] * $item['price'];
                             $subtotal += $item_total;
+                            $current_menu_item_id = intval($item['menu_item_id']);
                     ?>
                         <div class="order-item">
                             <div class="row">
@@ -408,13 +432,13 @@ $status_options = array(
                                     <div class="form-group">
                                         <label>Ürün:</label>
                                         <p><?php echo htmlspecialchars($item['name']); ?> (<?php echo htmlspecialchars($item['category']); ?>)</p>
-                                        <input type="hidden" name="detail_id[]" value="<?php echo intval($item['id']); ?>">
+                                        <input type="hidden" name="item_menu_ids[]" value="<?php echo $current_menu_item_id; ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="quantity_<?php echo intval($item['id']); ?>">Adet:</label>
-                                        <input type="number" class="form-control" id="quantity_<?php echo intval($item['id']); ?>" name="quantity[]" value="<?php echo intval($item['quantity']); ?>" min="1" required>
+                                        <label for="quantity_<?php echo $current_menu_item_id; ?>">Adet:</label>
+                                        <input type="number" class="form-control" id="quantity_<?php echo $current_menu_item_id; ?>" name="quantity[]" value="<?php echo intval($item['quantity']); ?>" min="1" required>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
@@ -431,16 +455,14 @@ $status_options = array(
                                 </div>
                                 <div class="col-md-2">
                                     <div class="form-group">
-                                        <label for="special_instructions_<?php echo intval($item['id']); ?>">Özel İstek:</label>
-                                        <textarea class="form-control" id="special_instructions_<?php echo intval($item['id']); ?>" name="special_instructions[]" rows="2"><?php echo htmlspecialchars($item['special_instructions'] ?? ''); ?></textarea>
+                                        <label for="special_instructions_<?php echo $current_menu_item_id; ?>">Özel İstek:</label>
+                                        <textarea class="form-control" id="special_instructions_<?php echo $current_menu_item_id; ?>" name="special_instructions[]" rows="2"><?php echo htmlspecialchars($item['special_instructions'] ?? ''); ?></textarea>
                                     </div>
                                 </div>
                                 <div class="col-md-1 d-flex align-items-center">
-                                    <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]). '?id=' . $order_id; ?>" style="display:inline;">
-                                        <button type="submit" class="btn btn-danger btn-sm" name="delete_item" value="<?php echo intval($item['id']); ?>" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="submit" class="btn btn-danger btn-sm" name="delete_item_menu_id" value="<?php echo $current_menu_item_id; ?>" onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?');">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -503,6 +525,13 @@ $status_options = array(
                                         <label for="new_special_instructions">Özel İstek:</label>
                                         <textarea class="form-control" id="new_special_instructions" name="new_special_instructions" rows="2"></textarea>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12 text-right">
+                                    <button type="submit" name="add_new_item_action" value="true" class="btn btn-success">
+                                        <i class="fas fa-plus"></i> Ürün Ekle
+                                    </button>
                                 </div>
                             </div>
                         </div>

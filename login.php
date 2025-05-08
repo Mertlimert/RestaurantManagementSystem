@@ -2,6 +2,12 @@
 // Oturum başlat
 session_start();
 
+// Eğer kullanıcı zaten giriş yapmışsa ve admin ise, admin paneline yönlendir
+if (isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true && isset($_SESSION["admin"]) && $_SESSION["admin"] === true) {
+    header("location: admin/index.php");
+    exit;
+}
+
 // Veritabanı bağlantısını dahil et
 require_once 'config/database.php';
 

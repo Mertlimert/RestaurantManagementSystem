@@ -1,10 +1,15 @@
 <?php
 // Oturum başlat
-session_start();
+if (session_status() == PHP_SESSION_NONE) { // Ensure session is started
+    session_start();
+}
 
-// Kullanıcı giriş yapmış mı kontrol et
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("location: ../login.php");
+// Kullanıcı giriş yapmış mı ve admin mi kontrol et
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true || !isset($_SESSION["admin"]) || $_SESSION["admin"] !== true) {
+    // Admin değilse veya giriş yapmamışsa, ana login sayfasına yönlendir (artık login.php)
+    // Hata mesajı login.php'de gösterilebilir (örneğin session ile taşınarak)
+    $_SESSION['login_error_message'] = "Admin paneline erişmek için lütfen giriş yapın."; // Farklı bir session key kullanalım
+    header("location: ../login.php?error=auth_required"); 
     exit;
 }
 
