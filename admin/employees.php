@@ -281,10 +281,6 @@ $positions = $employeeModel->getAllPositions();
                             <label for="email">Email</label>
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
                          <div class="form-group">
                             <label for="hourly_rate">Hourly Rate (₺)</label>
                             <input type="number" step="0.01" class="form-control" id="hourly_rate" name="hourly_rate" required>
