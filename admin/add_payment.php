@@ -138,6 +138,7 @@ if (isset($_GET["id"]) && !empty(trim($_GET["id"]))) {
         <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
         <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
         <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
+        <a href="shift_types.php"><i class="fas fa-clock mr-2"></i> Shift Types</a>
         <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>
         <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menü</a>
         <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Malzemeler</a>

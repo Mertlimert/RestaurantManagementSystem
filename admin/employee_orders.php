@@ -126,6 +126,7 @@ if (isset($_SESSION['error_msg'])) {
         <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Gösterge Paneli</a>
         <a href="customers.php"><i class="fas fa-users mr-2"></i> Müşteriler</a>
         <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Çalışanlar</a>
+        <a href="shift_types.php"><i class="fas fa-clock mr-2"></i> Shift Types</a>
         <a href="employee_orders.php" class="active"><i class="fas fa-clipboard-check mr-2"></i> Çalışan Siparişleri</a>
         <a href="customer_orders.php"><i class="fas fa-chart-bar mr-2"></i> Müşteri Analizi</a>
         <a href="tables.php"><i class="fas fa-chair mr-2"></i> Masalar</a>

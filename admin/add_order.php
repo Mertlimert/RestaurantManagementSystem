@@ -104,6 +104,9 @@ $tables = $tableModel->getAllTables();
 // Get table_id parameter from URL
 $selected_table_id = isset($_GET['table_id']) ? $_GET['table_id'] : '';
 
+// Get available tables only instead of all tables
+$tables = $tableModel->getAvailableTables();
+
 // Get menu items
 $menuItems = $menuItemModel->getAllMenuItems();
 ?>
@@ -189,6 +192,7 @@ $menuItems = $menuItemModel->getAllMenuItems();
         <a href="index.php"><i class="fas fa-tachometer-alt mr-2"></i> Dashboard</a>
         <a href="customers.php"><i class="fas fa-users mr-2"></i> Customers</a>
         <a href="employees.php"><i class="fas fa-user-tie mr-2"></i> Employees</a>
+        <a href="shift_types.php"><i class="fas fa-clock mr-2"></i> Shift Types</a>
         <a href="tables.php"><i class="fas fa-chair mr-2"></i> Tables</a>
         <a href="menu.php"><i class="fas fa-utensils mr-2"></i> Menu</a>
         <a href="ingredients.php"><i class="fas fa-carrot mr-2"></i> Ingredients</a>
@@ -251,9 +255,9 @@ $menuItems = $menuItemModel->getAllMenuItems();
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
-                                <label for="table_id">Table</label>
+                                <label for="table_id">Available Table</label>
                                 <select class="form-control" id="table_id" name="table_id" required>
-                                    <option value="">Select Table</option>
+                                    <option value="">Select Available Table</option>
                                     <?php mysqli_data_seek($tables, 0); ?>
                                     <?php while ($table = mysqli_fetch_assoc($tables)): ?>
                                         <option value="<?php echo $table['table_id']; ?>" <?php echo $table['table_id'] == $selected_table_id ? 'selected' : ''; ?>>
